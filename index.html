@@ -11,6 +11,11 @@
             <h1>Todo List</h1>
             <form id="todoForm">
                 <input type="text" id="todoInput" placeholder="Что нужно сделать?" required>
+                <select id="prioritySelect">
+                    <option value="low">Низкий</option>
+                    <option value="medium" selected>Средний</option>
+                    <option value="high">Высокий</option>
+                </select>
                 <button type="submit">Добавить</button>
             </form>
             <div class="todo-stats">

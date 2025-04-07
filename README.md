@@ -1,10 +1,14 @@
 # Todo List App
 
-Simple and functional todo list application with the following features:
+Simple and functional To-Do List Application
+
+features:
 - Add and delete tasks
 - Mark tasks as completed
-- Task counter
-- Local storage support
+- Task counter (total and completed)
+- Local storage support (data saved between sessions)
+- Dark background for the body
+- Task priority with visual styling
 
 ## Technologies
 - HTML5
@@ -12,6 +16,5 @@ Simple and functional todo list application with the following features:
 - JavaScript
 
 ## Coming Soon
-- Task priorities
 - Filtering
 - Sorting

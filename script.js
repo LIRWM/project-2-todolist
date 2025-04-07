@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             completedTasks.textContent = todos.filter(todo => todo.completed).length;
         }
     }
+    
     function saveTodos() {
         localStorage.setItem('todos', JSON.stringify(todos));
         updateStats();

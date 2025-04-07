@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const todoList = document.getElementById('todoList');
     const totalTasks = document.getElementById('totalTasks');
     const completedTasks = document.getElementById('completedTasks');
+    const prioritySelect = document.getElementById('prioritySelect')
     
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
     
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
             completedTasks.textContent = todos.filter(todo => todo.completed).length;
         }
     }
-    
+
     function saveTodos() {
         localStorage.setItem('todos', JSON.stringify(todos));
         updateStats();
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createTodoElement(todo) {
         const li  = document.createElement('li');
         li.className = 'todo-item';
+        li.className = `todo-item priority-${todo.priority}`;
         if (todo.completed) li.classList.add('completed');
 
         const checkbox = document.createElement('input');
@@ -76,8 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
     todoForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const text = todoInput.value.trim();
+        const priority = prioritySelect.value;
         if (text) {
-            todos.push({ text, completed: false});
+            todos.push({ text, completed: false, priority});
             todoInput.value = '';
             renderTodos();
             saveTodos();

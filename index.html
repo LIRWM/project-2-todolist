@@ -18,6 +18,19 @@
                 </select>
                 <button type="submit">Добавить</button>
             </form>
+            <div class="controls">
+                <select id="filterPriority"> 
+                    <option value="all">Все задачи</option>
+                    <option value="high">Высокий приоритет</option>
+                    <option value="medium">Средний приоритет</option>
+                    <option value="low">Низкий приоритет</option>
+                </select>
+                <select id="sortBy">
+                    <option value="default">По умолчанию</option>
+                    <option value="priority">По приоритету</option>
+                    <option value="name">По названию</option>
+                </select>
+            </div>
             <div class="todo-stats">
                 <span>Всего задач: <span id="totalTasks">0</span></span>
                 <span>Выполнено: <span id="completedTasks">0</span></span>

@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const todoList = document.getElementById('todoList');
     const totalTasks = document.getElementById('totalTasks');
     const completedTasks = document.getElementById('completedTasks');
-    const prioritySelect = document.getElementById('prioritySelect')
+    const prioritySelect = document.getElementById('prioritySelect');
+    const filterPriority = document.getElementById('filterPriority');
+    const sortBy = document.getElementById('sortBy');
+
     
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
     
@@ -24,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createTodoElement(todo) {
         const li  = document.createElement('li');
-        li.className = 'todo-item';
         li.className = `todo-item priority-${todo.priority}`;
         if (todo.completed) li.classList.add('completed');
 
@@ -46,11 +48,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return li;
     }
 
-    function renderTodos() {
+    function filterAndSortTodos() {
+        let filteredTodos = [...todos];
+
+        if (filterPriority.value !== 'all') {
+            filteredTodos = filteredTodos.filter(todo => todo.priority === filterPriority.value);
+        }
+
+        switch(sortBy.value){
+            case 'priority':
+                const priorityOrder = {high: 1, medium: 2, low: 3};
+                filteredTodos.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+                break;
+            case 'name':
+                filteredTodos.sort((a, b) => a.text.localeCompare(b.text));
+                break;
+            }
+
+            return filteredTodos;
+    }
+        function renderTodos() {
         if (!todoList) return;
 
         todoList.innerHTML = '';
-        todos.forEach((todo, index) => {
+        const filteredTodos = filterAndSortTodos();
+        filteredTodos.forEach((todo, index) => {
             const li = createTodoElement(todo);
             const checkbox = li.querySelector('input[type="checkbox"]');
             const deleteBtn = li.querySelector('.delete-btn');
@@ -87,6 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    filterPriority.addEventListener('change', renderTodos);
+    sortBy.addEventListener('change', renderTodos);
     renderTodos();
     updateStats(); 
 });

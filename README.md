@@ -7,14 +7,19 @@ features:
 - Mark tasks as completed
 - Task counter (total and completed)
 - Local storage support (data saved between sessions)
-- Dark background for the body
-- Task priority with visual styling
+- Dark background for better visibility
+- Task priorities (High, Medium, Low) with visual indicators
+- Priority filtering
+- Task sorting (by priority and name)
 
 ## Technologies
 - HTML5
 - CSS3
 - JavaScript
+- Local Storage API
 
 ## Coming Soon
-- Filtering
-- Sorting
+- Due dates
+- Categories
+- Task editing
+- Search functionality

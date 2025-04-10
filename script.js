@@ -37,12 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const span = document.createElement('span');
         span.textContent = todo.text;
 
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.textContent = 'Изменить';
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.textContent = 'Удалить';
 
         li.appendChild(checkbox);
         li.appendChild(span);
+        li.appendChild(editBtn);
         li.appendChild(deleteBtn);
 
         return li;
@@ -76,12 +81,44 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = createTodoElement(todo);
             const checkbox = li.querySelector('input[type="checkbox"]');
             const deleteBtn = li.querySelector('.delete-btn');
+            const editBtn = li.querySelector('.edit-btn');
+            const span = li.querySelector('span');
 
             if (checkbox) {
                 checkbox.addEventListener('change', () => {
                     todos[index].completed = !todos[index].completed;
                     li.classList.toggle('completed');
                     saveTodos();
+                });
+            }
+
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'edit-input';
+                    input.value = todo.text;
+
+                    span.style.display = 'none';
+                    li.insertBefore(input, editBtn);
+                    input.focus();
+
+                    input.addEventListener('blur', () => {
+                        const newText = input.value.trim();
+                        if (newText) {
+                            todo.text = newText;
+                            span.textContent = newText;
+                            saveTodos();
+                        }
+                        input.remove();
+                        span.style.display = '';
+                    });
+
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === "Enter") {
+                            input.blur();
+                        }
+                    });
                 });
             }
 

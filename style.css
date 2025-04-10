@@ -96,6 +96,30 @@ button:hover {
     margin-right: 10px;
 }
 
+.todo-item span {
+    flex: 1;
+    margin: 0 10px;
+}
+
+.edit-btn {
+    margin-left: 10px;
+    background-color: #2196F3;
+    padding: 5px 10px;
+}
+
+.edit-btn:hover {
+    background-color: #1976D2;
+}
+
+.edit-input {
+    flex: 1;
+    margin: 0 10px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 40px;
+    font-size: 16px;
+}
+
 .todo-item .delete-btn {
     margin-left: auto;
     background-color: #f44336;

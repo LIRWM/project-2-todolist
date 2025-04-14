@@ -11,6 +11,8 @@ features:
 - Task priorities (High, Medium, Low) with visual indicators
 - Priority filtering
 - Task sorting (by priority and name)
+- Task editing with instant save
+- Animation effects for delete and save actions
 
 ## Technologies
 - HTML5
@@ -21,5 +23,6 @@ features:
 ## Coming Soon
 - Due dates
 - Categories
-- Task editing
+- Task descriptions
 - Search functionality
+- Multiple lists support

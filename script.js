@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 filteredTodos.sort((a, b) => a.text.localeCompare(b.text));
                 break;
             }
-
             return filteredTodos;
     }
         function renderTodos() {
@@ -94,39 +93,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (editBtn) {
                 editBtn.addEventListener('click', () => {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'edit-input';
-                    input.value = todo.text;
-
-                    span.style.display = 'none';
-                    li.insertBefore(input, editBtn);
-                    input.focus();
-
-                    input.addEventListener('blur', () => {
+                    const isEditing = li.querySelector('.edit-input');
+                    const saveChanges = () => {
+                        const input = li.querySelector('.edit-input');
+                        if (!input) return;
                         const newText = input.value.trim();
                         if (newText) {
                             todo.text = newText;
                             span.textContent = newText;
+                            span.classList.add('saved');
+                            setTimeout(() => span.classList.remove('saved'), 600);
                             saveTodos();
                         }
                         input.remove();
                         span.style.display = '';
-                    });
+                        editBtn.textContent = 'Изменить';
+                        editBtn.classList.remove('saving');
+                    };
 
-                    input.addEventListener('keypress', (e) => {
-                        if (e.key === "Enter") {
-                            input.blur();
-                        }
-                    });
+                    if (!isEditing) {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.className = 'edit-input';
+                        input.value = todo.text;
+
+                        span.style.display = 'none';
+                        li.insertBefore(input, editBtn);
+                        input.focus();
+                        editBtn.textContent = 'Сохранить';
+                        editBtn.classList.add('saving');
+                        
+                        input.addEventListener('blur', saveChanges);
+                        input.addEventListener('keypress', (e) => {
+                            if (e.key === "Enter") {
+                                saveChanges();
+                            }
+                        });
+                    } else {
+                        saveChanges();
+                    }
                 });
-            }
+            }    
 
-            if(deleteBtn) {
+            if (deleteBtn) {
                 deleteBtn.addEventListener('click', () => {
-                    todos.splice(index, 1);
-                    renderTodos();
-                    saveTodos();
+                    li.classList.add('deleting');
+                    setTimeout(() => { 
+                        todos.splice(index, 1);
+                        renderTodos();
+                        saveTodos();
+                    }, 300);
                 });
             }
             

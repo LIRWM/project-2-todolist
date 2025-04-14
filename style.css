@@ -60,6 +60,7 @@ button:hover {
 .todo-item {
     display: flex;
     align-items: center;
+    gap: 10px;
     padding: 10px;
     background: #f9f9f9;
     margin-bottom: 10px;
@@ -96,19 +97,58 @@ button:hover {
     margin-right: 10px;
 }
 
+.todo-item .edit-input {
+    flex: 1;
+    min-width: 0;
+}
+
 .todo-item span {
     flex: 1;
+    word-break: break-word;
+    min-width: 0;
     margin: 0 10px;
 }
+
+.todo-item span.saved {
+    animation: saveFeedback 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes saveFeedback {
+    0% {
+        transform: scale(1);
+        color: inherit;
+        background: transparent;
+    }
+    30% {
+        transform: scale(1.05);
+        color: #4CAF50;
+        background: rgba(76, 175, 80, 0.1);
+    }
+    100% {
+        transform: scale(1);
+        color: inherit;
+        background: transparent;
+    }
+}
+
 
 .edit-btn {
     margin-left: 10px;
     background-color: #2196F3;
     padding: 5px 10px;
+    transition: all 0.3s ease;
+}
+
+.edit-btn.saving {
+    background-color: #4CAF50;
 }
 
 .edit-btn:hover {
     background-color: #1976D2;
+}
+
+.edit-btn.saving:hover {
+    background-color: #45a049;
 }
 
 .edit-input {
@@ -118,6 +158,25 @@ button:hover {
     border: 1px solid #ddd;
     border-radius: 40px;
     font-size: 16px;
+    animation: slideIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateX(-20px);
+     }
+     to {
+        opacity: 1;
+        transform: translateX(0);
+     }
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.3);
+    transition: all 0.3s ease;
 }
 
 .todo-item .delete-btn {
@@ -128,6 +187,22 @@ button:hover {
 
 .todo-item .delete-btn:hover {
     background-color: #da190b;
+}
+
+.todo-item.deleting {
+    animation: slideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+        margin-bottom: -50px;
+    }
 }
 
 .controls {

@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const prioritySelect = document.getElementById('prioritySelect');
     const filterPriority = document.getElementById('filterPriority');
     const sortBy = document.getElementById('sortBy');
+    const progressFill = document.getElementById('progressFill');
 
     
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
@@ -16,7 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
             totalTasks.textContent = todos.length;
         }
         if (completedTasks) {
-            completedTasks.textContent = todos.filter(todo => todo.completed).length;
+            const completed  = todos.filter(todo => todo.completed).length;
+            completedTasks.textContent = completed;
+            if (progressFill) {
+                const percentage = todos.length > 0 ? (completed/todos.length) * 100 : 0;
+                progressFill.style.width = `${percentage}%`;
+            }
         }
     }
 

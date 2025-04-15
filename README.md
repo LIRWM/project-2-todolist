@@ -13,6 +13,7 @@ features:
 - Task sorting (by priority and name)
 - Task editing with instant save
 - Animation effects for delete and save actions
+- Progress bar for completed tasks
 
 ## Technologies
 - HTML5
@@ -22,7 +23,8 @@ features:
 
 ## Coming Soon
 - Due dates
-- Categories
-- Task descriptions
-- Search functionality
-- Multiple lists support
+- Categories and tags
+- Advanced search functionality
+- Task descriptions and notes
+- Task reminders
+- Multiple lists and projects

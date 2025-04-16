@@ -11,6 +11,7 @@
             <h1>Todo List</h1>
             <form id="todoForm">
                 <input type="text" id="todoInput" placeholder="Что нужно сделать?" required>
+                <input type="date" id="dueDateInput" title="Срок выполнения" min="" aria-label="Дата выполнения">
                 <select id="prioritySelect">
                     <option value="low">Низкий</option>
                     <option value="medium" selected>Средний</option>
@@ -29,6 +30,7 @@
                     <option value="default">По умолчанию</option>
                     <option value="priority">По приоритету</option>
                     <option value="name">По названию</option>
+                    <option value="dueDate">По сроку</option>
                 </select>
             </div>
             <div class="todo-stats">

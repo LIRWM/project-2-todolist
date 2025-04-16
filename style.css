@@ -68,6 +68,36 @@ button:hover {
     transition: background-color 0.3s;
 }
 
+#dueDateInput {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 40px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.todo-item .due-date {
+    font-size: 0.85em;
+    color: #666;
+    margin-left: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #f0f0f0;
+}
+
+.todo-item .edit-date {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 40px;
+    font-size: 0.85em;
+    margin: 0 5px;
+}
+
+.todo-item .due-date.overdue {
+    color: #fff;
+    background: #F44336;
+}
+
 .todo-item.priority-low {
     border-left: 4px solid #4CAF50;
 }

@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const todoForm = document.getElementById('todoForm');
     const todoInput = document.getElementById('todoInput');
+    const dueDateInput = document.getElementById('dueDateInput');
     const todoList = document.getElementById('todoList');
     const totalTasks = document.getElementById('totalTasks');
     const completedTasks = document.getElementById('completedTasks');
@@ -26,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const today = new Date().toISOString().split('T')[0];
+    dueDateInput.min = today;
+
     function saveTodos() {
         localStorage.setItem('todos', JSON.stringify(todos));
         updateStats();
@@ -42,6 +46,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const span = document.createElement('span');
         span.textContent = todo.text;
+        
+        const dueDate = document.createElement('span')
+        dueDate.className = 'due-date';
+        if (todo.dueDate) {
+            dueDate.textContent = new Date(todo.dueDate).toLocaleDateString();
+            if (new Date(todo.dueDate) < new Date().setHours(0, 0, 0, 0)) {
+                dueDate.classList.add('overdue');
+            }
+        }
 
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
@@ -53,8 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         li.appendChild(checkbox);
         li.appendChild(span);
+        li.appendChild(dueDate);
         li.appendChild(editBtn);
         li.appendChild(deleteBtn);
+ 
 
         return li;
     }
@@ -74,6 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'name':
                 filteredTodos.sort((a, b) => a.text.localeCompare(b.text));
                 break;
+            case 'dueDate':
+                filteredTodos.sort((a, b) => {
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+                    return new Date(a.dueDate) - new Date(b.dueDate);
+                });
+                break; 
             }
             return filteredTodos;
     }
@@ -160,9 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const text = todoInput.value.trim();
         const priority = prioritySelect.value;
+        const dueDate = dueDateInput.value;
+
         if (text) {
-            todos.push({ text, completed: false, priority});
+            todos.push({ text, completed: false, priority, dueDate: dueDate || null});
             todoInput.value = '';
+            dueDateInput.value = '';
             renderTodos();
             saveTodos();
         }

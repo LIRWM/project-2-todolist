@@ -124,16 +124,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     const isEditing = li.querySelector('.edit-input');
                     const saveChanges = () => {
                         const input = li.querySelector('.edit-input');
+                        const dateInput = li.querySelector('.edit-date')
                         if (!input) return;
+
                         const newText = input.value.trim();
+                        ///////
+
                         if (newText) {
                             todo.text = newText;
+                            ////////
                             span.textContent = newText;
+                            ///////
                             span.classList.add('saved');
                             setTimeout(() => span.classList.remove('saved'), 600);
                             saveTodos();
                         }
                         input.remove();
+                        ///////
                         span.style.display = '';
                         editBtn.textContent = 'Изменить';
                         editBtn.classList.remove('saving');
@@ -145,13 +152,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         input.className = 'edit-input';
                         input.value = todo.text;
 
+                        ////////////
+
                         span.style.display = 'none';
                         li.insertBefore(input, editBtn);
+                        //////////
                         input.focus();
                         editBtn.textContent = 'Сохранить';
                         editBtn.classList.add('saving');
                         
                         input.addEventListener('blur', saveChanges);
+                        //////////
                         input.addEventListener('keypress', (e) => {
                             if (e.key === "Enter") {
                                 saveChanges();

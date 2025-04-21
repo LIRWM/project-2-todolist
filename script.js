@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'dueDate':
                 filteredTodos.sort((a, b) => {
+                    if (!a.dueDate && !b.dueDate) return 0;
                     if (!a.dueDate) return 1;
                     if (!b.dueDate) return -1;
                     return new Date(a.dueDate) - new Date(b.dueDate);
@@ -128,19 +129,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (!input) return;
 
                         const newText = input.value.trim();
-                        ///////
+                        const newDate = dateInput ? dateInput.value : todo.dueDate;
 
                         if (newText) {
                             todo.text = newText;
-                            ////////
+                            todo.dueDate = newDate;
                             span.textContent = newText;
-                            ///////
+                            const dueDateElement = li.querySelector('.due-date');
+                            if (dueDateElement) {
+                                dueDateElement.style.display = '';
+                                if (newDate) {
+                                    dueDateElement.textContent = new Date(newDate).toLocaleDateString();
+                                    dueDateElement.classList.toggle('overdue', new Date(newDate) < new Date().setHours(0, 0, 0, 0));
+                                } else {
+                                    dueDateElement.textContent = '';
+                                    dueDateElement.classList.remove('overdue');
+                                }
+                            }
                             span.classList.add('saved');
                             setTimeout(() => span.classList.remove('saved'), 600);
                             saveTodos();
                         }
                         input.remove();
-                        ///////
+                        dateInput?.remove();
                         span.style.display = '';
                         editBtn.textContent = 'Изменить';
                         editBtn.classList.remove('saving');
@@ -152,18 +163,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         input.className = 'edit-input';
                         input.value = todo.text;
 
-                        ////////////
+                        const dateInput = document.createElement('input');
+                        dateInput.type = 'date';
+                        dateInput.className = 'edit-date';
+                        dateInput.value = todo.dueDate || '';
+                        dateInput.min = today;
+
 
                         span.style.display = 'none';
-                        li.insertBefore(input, editBtn);
-                        //////////
+                        const dueDate = li.querySelector('.due-date');
+                        if (dueDate) dueDate.style.display = 'none';
+
+  
+                        li.insertBefore(input, editBtn);                   
+                        li.insertBefore(dateInput, editBtn);   
                         input.focus();
                         editBtn.textContent = 'Сохранить';
                         editBtn.classList.add('saving');
-                        
-                        input.addEventListener('blur', saveChanges);
-                        //////////
+
                         input.addEventListener('keypress', (e) => {
+                            if (e.key === "Enter") {
+                                saveChanges();
+                            }
+                        });
+                        dateInput.addEventListener('keypress', (e) => {
                             if (e.key === "Enter") {
                                 saveChanges();
                             }

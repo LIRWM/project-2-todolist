@@ -1,3 +1,23 @@
+:root {
+    --bg-main: rgb(27, 27, 27);
+    --bg-container: white;
+    --text-color: #333;
+    --border-color: #ddd;
+    --item-bg: #f9f9f9;
+    --stats-bg: rgba(0, 0, 0, 0.05);
+    --completed-bg: #e8f8e9;
+}
+
+[data-theme="dark"] {
+    --bg-main: #1a1a1a;
+    --bg-container: #2d2d2d;
+    --text-color: #ffffff;
+    --border-color: #404040;
+    --item-bg: #363636;
+    --stats-bg: rgba(255, 255, 255, 0.05);
+    --completed-bg: #2e3b2f;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,24 +26,26 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: rgb(27, 27, 27);
+    background-color: var(--bg-main);
     padding: 20px;
 }
 
 .container {
     max-width: 800px;
     margin: 0 auto;
-    background: white;
+    background: var(--bg-container);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: relative; 
 }
 
 h1 {
     text-align: center;
-    color: #333;
+    color: var(--text-color);
     margin-bottom: 20px;
 }
+
 
 #todoForm {
     display: flex;
@@ -297,4 +319,23 @@ button:hover {
     background: linear-gradient(90deg, #4CAF50, #8BC34A);
     width: 0;
     transition: width 0.3s ease;
+}
+
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: 2px solid var(--border-color);
+    width: 40px;
+    height: 40px; 
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.them-toggle :hover {
+    transform: scale(1.1);
+    background-color: var(--stats-bg);
 }

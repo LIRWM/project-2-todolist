@@ -18,6 +18,10 @@
                     <option value="medium" selected>Средний</option>
                     <option value="high">Высокий</option>
                 </select>
+                <select id="categorySelect">
+                    <option value="">Без категории</option>
+                </select>
+
                 <button type="submit">Добавить</button>
             </form>
             <div class="controls">
@@ -29,10 +33,13 @@
                 </select>
                 <select id="sortBy">
                     <option value="default">По умолчанию</option>
+                    <option value="category">По категории</option>
                     <option value="priority">По приоритету</option>
                     <option value="name">По названию</option>
                     <option value="dueDate">По сроку</option>
                 </select>
+                <button id="addCategoryButton">Добавить категорию</button>
+                <button id="archiveButton">Архив</button>
             </div>
             <div class="todo-stats">
                 <div class="stats-numbers">

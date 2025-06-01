@@ -196,6 +196,24 @@ button:hover {
     color: var(--text-color);
 }
 
+#categorySelect {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 40px;
+    margin-right: 10px;
+    background: var(--item-bg);
+    color: var(--text-color);
+}
+
+
+.todo-item.fade-out {
+    opacity: 0;
+    transform: transplateX(100%);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
 .todo-item.completed {
     background: var(--completed-bg);
     text-decoration: line-through;
@@ -396,4 +414,47 @@ button:hover {
     background-color: var(--stats-bg);
     border:  2px solid var(--text-color);
     opacity: 0.9;
+}
+
+.archive-note {
+    font-size: 0.9em;
+    color: var(--completed-text);
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.archive-container {
+    background: var(--bg-container);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.archive-list {
+    list-style: none;
+    margin-top: 20px;
+}
+
+.todo-category {
+    font-size: 0.85em;
+    padding: 2px 8px;
+    background: var(--due-date-bg);
+    border-radius: 12px;
+    margin-right: 10px;
 }

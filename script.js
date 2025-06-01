@@ -10,10 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const sortBy = document.getElementById('sortBy');
     const progressFill = document.getElementById('progressFill');
     const themeToggle = document.getElementById('themeToggle');
+    const categorySelect = document.getElementById('categorySelect');
+    const addCategoryButton = document.getElementById('addCategoryButton');
+    const archiveButton = document.getElementById('archiveButton');
 
-    
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
-    
+    let archivedTodos = JSON.parse(localStorage.getItem('archivedTodos')) || [];
+    let categories = JSON.parse(localStorage.getItem('categories')) || [];
+
     function updateStats() {
         if (totalTasks) {
             totalTasks.textContent = todos.length;
@@ -35,6 +39,33 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('todos', JSON.stringify(todos));
         updateStats();
     }
+    
+    function saveArchivedTodos() {
+        localStorage.setItem('archivedTodos', JSON.stringify(archivedTodos));
+    }
+
+    function saveCategories() {
+        localStorage.setItem('categories', JSON.stringify(categories));
+    }
+
+    function updateCategorySelect() {
+        categorySelect.innerHTML = '<option value="">Без категории</option>';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        });
+    }
+
+    addCategoryButton.addEventListener('click', () => {
+        const category = prompt('Введите название категории:');
+        if (category && !categories.includes(category)) {
+            categories.push(category);
+            saveCategories();
+            updateCategorySelect();
+        }
+    });
 
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -61,6 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const span = document.createElement('span');
         span.textContent = todo.text;
         
+        const categorySpan = document.createElement('span');
+        categorySpan.className = 'todo-category';
+        categorySpan.textContent = todo.category;
+
         const dueDate = document.createElement('span')
         dueDate.className = 'due-date';
         if (todo.dueDate) {
@@ -80,12 +115,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
         li.appendChild(checkbox);
         li.appendChild(span);
+        li.appendChild(categorySpan);
         li.appendChild(dueDate);
         li.appendChild(editBtn);
         li.appendChild(deleteBtn);
  
 
         return li;
+    }
+
+    function showArchiveModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+
+        const archiveContainer = document.createElement('div');
+        archiveContainer.className = 'archive-container'; 
+
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'x';
+        closeBtn.className = 'close-btn';
+        closeBtn.onclick = () => document.body.removeChild(modal);
+
+        const title = document.createElement('h2');
+        title.textContent = 'Архив задач';
+
+        const archiveList = document.createElement('div');
+        archiveList.className = 'archive-list';
+
+       archivedTodos.forEach(todo => {
+            const archiveItem = document.createElement('div');
+            archiveItem.className = 'archive-item';
+        
+            const text = document.createElement('span');
+            text.textContent = todo.text;
+
+            const category = document.createElement('span');
+            category.className = 'todo-category';
+            category.textContent = todo.category || '';
+
+            const note = document.createElement('div');
+            note.className = 'archive-note';
+            note.textContent = todo.archiveNote || '';
+
+            const date = document.createElement('span');
+            date.className = 'archive-date';
+            date.textContent = new Date(todo.archiveDate).toLocaleDateString();
+            
+            archiveItem.appendChild(text);
+            if (todo.category) archiveItem.appendChild(category);
+            if (todo.archiveNote) archiveItem.appendChild(note);
+            archiveItem.appendChild(date);
+            archiveList.appendChild(archiveItem);
+        });
+
+        archiveContainer.appendChild(closeBtn);
+        archiveContainer.appendChild(title);
+        archiveContainer.appendChild(archiveList);
+        modal.appendChild(archiveContainer);
+        document.body.appendChild(modal);
+    }
+
+    archiveButton.addEventListener('click', showArchiveModal);
+
+    function archiveTodo(todo, index) {
+        const note = prompt('Добавьте заметку о выполнении (необязательно):');
+        const todoToArchive = { ...todo, archiveNote: note, archiveDate: new Date().toISOString() };
+
+        archivedTodos.push(todoToArchive);
+        todos.splice(index, 1);
+        
+        saveArchivedTodos();
+        saveTodos();
+        renderTodos();
     }
 
     function filterAndSortTodos() {
@@ -95,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredTodos = filteredTodos.filter(todo => todo.priority === filterPriority.value);
         }
 
-        switch(sortBy.value){
+        switch(sortBy.value) {
             case 'priority':
                 const priorityOrder = {high: 1, medium: 2, low: 3};
                 filteredTodos.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
@@ -111,6 +213,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return new Date(a.dueDate) - new Date(b.dueDate);
                 });
                 break; 
+            case 'category':
+                filteredTodos.sort((a, b) => {
+                    if (!a.category && !b.category) return 0;
+                    if (!a.category) return 1;
+                    if (!b.category) return -1;
+                    return a.category.localeCompare(b.category);
+                });
+                break;
             }
             return filteredTodos;
     }
@@ -128,8 +238,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (checkbox) {
                 checkbox.addEventListener('change', () => {
-                    todos[index].completed = !todos[index].completed;
-                    li.classList.toggle('completed');
+                    const todo = todos[index];
+                    if (!todo.completed) {
+                        todo.completed = true;
+                        li.classList.add('completed');
+                        li.classList.add('fade-out');
+                        setTimeout(() => {
+                            archiveTodo(todo, index);
+                        }, 500);
+                    } else {
+                        todo.completed = false;
+                        li.classList.remove('completed');
+                    }
                     saveTodos();
                 });
             }
@@ -231,9 +351,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = todoInput.value.trim();
         const priority = prioritySelect.value;
         const dueDate = dueDateInput.value;
+        const category = categorySelect.value;
 
         if (text) {
-            todos.push({ text, completed: false, priority, dueDate: dueDate || null});
+            todos.push({ text, completed: false, priority, dueDate: dueDate || null, category: category || null });
             todoInput.value = '';
             dueDateInput.value = '';
             renderTodos();
@@ -243,6 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filterPriority.addEventListener('change', renderTodos);
     sortBy.addEventListener('change', renderTodos);
+    updateCategorySelect();
     renderTodos();
     updateStats(); 
 });

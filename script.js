@@ -143,10 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const archiveList = document.createElement('div');
         archiveList.className = 'archive-list';
 
-       archivedTodos.forEach(todo => {
+       archivedTodos.forEach((todo, index) => {
             const archiveItem = document.createElement('div');
             archiveItem.className = 'archive-item';
         
+            const number = document.createElement('span');
+            number.className = 'archive-number';
+            number.textContent = `${index + 1}. `;
+
             const text = document.createElement('span');
             text.textContent = todo.text;
 
@@ -162,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             date.className = 'archive-date';
             date.textContent = new Date(todo.archiveDate).toLocaleDateString();
             
+            archiveItem.appendChild(number);
             archiveItem.appendChild(text);
             if (todo.category) archiveItem.appendChild(category);
             if (todo.archiveNote) archiveItem.appendChild(note);

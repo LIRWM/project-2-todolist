@@ -56,6 +56,7 @@
 body {
     font-family: Arial, sans-serif;
     background-color: var(--bg-main);
+    color: var(--text-color);
     padding: 20px;
 }
 
@@ -74,7 +75,6 @@ h1 {
     color: var(--text-color);
     margin-bottom: 20px;
 }
-
 
 #todoForm {
     display: flex;
@@ -436,6 +436,12 @@ button:hover {
     z-index: 1000;
 }
 
+.archive-number {
+    font-weight: bold;
+    margin-right: 8px;
+    color: var(--text-color);
+}
+
 .archive-container {
     background: var(--bg-container);
     padding: 20px;
@@ -449,6 +455,7 @@ button:hover {
 .archive-list {
     list-style: none;
     margin-top: 20px;
+    color: var(--text-color);
 }
 
 .todo-category {

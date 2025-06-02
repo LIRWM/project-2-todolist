@@ -164,8 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const date = document.createElement('span');
             date.className = 'archive-date';
-            date.textContent = new Date(todo.archiveDate).toLocaleDateString();
-            
+            if (todo.archiveDate) { 
+                const archiveDate = new Date(todo.archiveDate);
+                if (!isNaN(archiveDate.getTime())) { 
+                date.textContent = archiveDate.toLocaleDateString();
+                }
+            }
+
             archiveItem.appendChild(number);
             archiveItem.appendChild(text);
             if (todo.category) archiveItem.appendChild(category);

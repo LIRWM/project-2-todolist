@@ -7,12 +7,12 @@
     --stats-bg: rgba(0, 0, 0, 0.05);
     --completed-bg: rgba(76, 175, 80, 0.1);
     --completed-text: #666;
-    --button-bg: #4CAF50;
+    --button-bg: #8ab446;
     --button-hover: #45a049;
-    --edit-button-bg: #2196F3;
-    --edit-button-hover: #1976D2;
-    --delete-button-bg: #f44336;
-    --delete-button-hover: #da190b;
+    --edit-button-bg: #015366;
+    --edit-button-hover: #716da6;
+    --delete-button-bg: #5e1914;
+    --delete-button-hover: #97010E;
     --due-date-bg: #f0f0f0;
     --due-date-color: #666;
     --overdue-bg: #F44336;
@@ -26,18 +26,18 @@
 [data-theme="dark"] {
     --bg-main: #1a1a1a;
     --bg-container: #333333;
-    --text-color: #ffffff;
+    --text-color: #E9E9E9;
     --border-color: #505050;
     --item-bg: #2a2a2a;
     --stats-bg: rgba(255, 255, 255, 0.08);
     --completed-bg: rgba(76, 175, 80, 0.15);
     --completed-text: #aaa;
-    --button-bg: #4CAF49;
+    --button-bg: #76860a;
     --button-hover: #2d662f;
-    --edit-button-bg: #1976D2;
-    --edit-button-hover: #115293;
-    --delete-button-bg: #d32f2f;
-    --delete-button-hover: #b71c1c;
+    --edit-button-bg: #393A5A;
+    --edit-button-hover: #716da6;
+    --delete-button-bg: #5e1914;
+    --delete-button-hover: #97010E;
     --due-date-bg: #404040;
     --due-date-color: #aaa;
     --overdue-bg: #d32f2f;
@@ -146,7 +146,7 @@ button:hover {
 .todo-item .due-date {
     flex: 0 0 auto;
     font-size: 0.85em;
-    color: var(--due-date-color);
+    color: var(--text-color);
     margin-left: auto;
     margin-right: 10px;
     min-width: 100px;
@@ -450,6 +450,47 @@ button:hover {
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
+    position: relative;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    transform: scale(1.1);
+    color: var(--delete-button-bg);
+}
+
+.archive-item {
+    padding: 15px;
+    margin: 10px 0;
+    background: var(--item-bg);
+    border-radius: 8px;
+    display: flex;
+    flex: wrap;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.4;
+}
+
+.archive-date {
+    margin-left: auto;
+    color: var(--text-color);
+    font-size: 0.9em;
+    padding: 2px 8px;
+    background: var(--due-date-bg);
+    border-radius: 12px;
 }
 
 .archive-list {

@@ -531,3 +531,116 @@ button:hover {
     border-radius: 12px;
     margin-right: 10px;
 }
+
+.hidden {
+    display: none;
+}
+
+.auth-container {
+    max-width: 400px;
+    margin: 40px auto;
+    background: var(--bg-container);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-title {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--text-color);
+    font-size: 24px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-input {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 40px;
+    font-size: 16px;
+    background: var(--item-bg);
+    color: (--text-color);
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: var(--button-bg);
+    box-shadow: 0 0 5px rgba(88, 101, 242, 0.2);
+}
+
+.auth-button {
+    padding: 12px;
+    background-color: var(--button-bg);
+    color: white;
+    border: none;
+    border-radius: 40px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease, transform 0.2s ease; 
+}
+
+.auth-button:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-1px);
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 15px;
+    color: var(--text-color);
+}
+
+.auth-switch-link {
+    color: var(--button-bg);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.auth-switch-link:hover {
+    color: var(--button-hoven);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: var(--stats-bg);
+    border-radius: 8px;
+}
+
+.logout-button {
+    margin-left: auto;
+    background-color: var(--delete-button-bg);
+}
+
+.logout-button:hover {
+    background-color: var(--delete-button-hover);
+}
+
+.auth-error {
+    color: var(--delete-button-bg);
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    padding: 8px;
+    background: rgba(237, 66, 69, 0.1);
+    border-radius: 20px;
+    display: none;
+}
+
+.auth-error.visible {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-10px); }
+    to { opacity: 1; transform: translateY (0); }
+}

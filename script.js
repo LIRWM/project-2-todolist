@@ -1,3 +1,5 @@
+import { authService } from './service/auth.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const todoForm = document.getElementById('todoForm');
     const todoInput = document.getElementById('todoInput');
@@ -13,6 +15,83 @@ document.addEventListener('DOMContentLoaded', () => {
     const categorySelect = document.getElementById('categorySelect');
     const addCategoryButton = document.getElementById('addCategoryButton');
     const archiveButton = document.getElementById('archiveButton');
+    const authContainer = document.getElementById('authContainer');
+    const mainContainer = document.getElementById('mainContainer');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const showRegisterLink = document.getElementById('showRegister');
+    const showLoginLink = document.getElementById('showlogin');
+    const userEmailSpan = document.getElementById('userEmail');
+    const logoutButton = document.getElementById('logoutButton');
+
+    showRegisterLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+    });
+
+    showLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            alert('Пароли не совпадают');
+            return;
+        }
+
+        try {
+            await authService.register(email, password);
+            showApp();
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            await authService.login(email, password);
+            showApp();
+        } catch(error) {
+            alert(error.message);
+        }
+    });
+
+    logoutButton.addEventListener('click', async () => {
+        authService.logout();
+        showAuth();
+    });
+
+    function showAuth() {
+        authContainer.classList.remove('hidden');
+        mainContainer.classList.add('hidden');
+    }
+
+    function showApp() {
+        authContainer.classList.add('hidden');
+        mainContainer.classList.remove('hidden');
+        if (authService.currentUser) {
+            userEmailSpan.textContent = authService.currentUser.email;
+        }
+    }
+
+    if (authService.checkAuth) {
+        showApp();
+    } else { 
+        showAuth();
+    }
+
 
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
     let archivedTodos = JSON.parse(localStorage.getItem('archivedTodos')) || [];
@@ -36,17 +115,51 @@ document.addEventListener('DOMContentLoaded', () => {
     dueDateInput.min = today;
 
     function saveTodos() {
-        localStorage.setItem('todos', JSON.stringify(todos));
+        const userEmail = authService.currentUser?.email;
+        if (userEmail) {
+        localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
         updateStats();
+        }
     }
     
     function saveArchivedTodos() {
-        localStorage.setItem('archivedTodos', JSON.stringify(archivedTodos));
+        const userEmail = authService.currentUser?.email;
+        if (userEmail) {
+            localStorage.setItem(`archivedTodos_${userEmail}`, JSON.stringify(archivedTodos));
+        }
+    }
+    
+    function saveCategories() {
+        const userEmail = authService.currentUser?.email;
+        if (userEmail) {
+            localStorage.setItem(`categories_${userEmail}`, JSON.stringify(categories));
+        }
     }
 
-    function saveCategories() {
-        localStorage.setItem('categories', JSON.stringify(categories));
+    function loadUserData() {
+        const userEmail = authService.currentUser?.email;
+        if (userEmail) {
+            todos = JSON.parse(localStorage.getItem(`todos_${userEmail}`)) || [];
+            archivedTodos = JSON.parse(localStorage.getItem(`archivedTodos_${userEmail}`)) || [];
+            categories = JSON.parse(localStorage.getItem(`categories_${userEmail}`)) || [];
+            updateTodoList();
+            updateStats();
+            updateCategorySelect();
+        }
     }
+
+    authService.addAuthStateListener((isAuthenticated) => {
+        if (isAuthenticated) {
+            loadUserData();
+        } else {
+            todos = [];
+            archivedTodos = [];
+            categories = [];
+            updateTodoList();
+            updateStats();
+            updateCategorySelect();
+        }
+    });
 
     function updateCategorySelect() {
         categorySelect.innerHTML = '<option value="">Без категории</option>';

@@ -1,6 +1,6 @@
 class AuthService {
     constructor() {
-        this.isAuthentificated = false;
+        this.isAuthenticated = false;
         this.currentUser = null;
     }
 
@@ -15,13 +15,13 @@ class AuthService {
     }
 
     logout() {
-        this.isauthorized = false;
+        this.isAuthenticated = false;
         this.currentUser = null;
         // Очистка локального хранилища
     }
 
     checkAuth() {
-        return this.isAuthentificated;
+        return this.isAuthenticated;
     }
 }
 

@@ -74,19 +74,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function showAuth() {
+        const blurredBg = document.getElementById('blurredBg');
         authContainer.classList.remove('hidden');
-        mainContainer.classList.add('hidden');
+        blurredBg.classList.remove('hidden');
+        mainContainer.classList.add('blur');
     }
 
     function showApp() {
+        const blurredBg = document.getElementById('blurredBg');
         authContainer.classList.add('hidden');
-        mainContainer.classList.remove('hidden');
+        blurredBg.classList.add('hidden');
+        mainContainer.classList.remove('blur');
         if (authService.currentUser) {
             userEmailSpan.textContent = authService.currentUser.email;
         }
     }
 
-    if (authService.checkAuth) {
+    if (authService.checkAuth()) {
         showApp();
     } else { 
         showAuth();

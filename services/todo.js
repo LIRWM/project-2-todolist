@@ -1,10 +1,12 @@
 class TodoService {
     constructor() {
-        this.baseUrl = '/api/todos';
+        this.todos = JSON.parse(localStorage.getItem('todos')) || [];
+        this.archivedTodos = JSON.parse(localStorage.getItem('archivedTodos')) || [];
     }
 
     async getAllTodos() {
         // Получение списка задач с сервера
+        return this.todos;
     }
 
     async createTodo(todoData) {

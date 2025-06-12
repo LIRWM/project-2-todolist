@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const showRegisterLink = document.getElementById('showRegister');
-    const showLoginLink = document.getElementById('showlogin');
+    const showLoginLink = document.getElementById('showLogin');
     const userEmailSpan = document.getElementById('userEmail');
     const logoutButton = document.getElementById('logoutButton');
 

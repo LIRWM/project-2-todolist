@@ -7,14 +7,14 @@
         <link rel="stylesheet" href="style.css">   
     </head>
     <body>
-        <div class="blurred-bg" id="blurredBg"></div>
-        <div class="auth-container" id="authContainer">
+        <div class="blurred-bg hidden" id="blurredBg"></div>
+        <div class="auth-container hidden" id="authContainer">
             <form id="loginForm" class="auth-form">
                 <h2>Вход</h2>
                 <input type="email" id="loginEmail" placeholder="Email" required>
                 <input type="password" id="loginPassword" placeholder="Пароль" required>
                 <button type="submit">Войти</button>
-                <p>Нет аккаунта?<a href="#" id="showRegister">Зарегистрироваться</a></p>
+                <p>Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a></p>
             </form>
             <form class="auth-form hidden" id="registerForm">
                 <h2>Регистрация</h2>
@@ -26,11 +26,16 @@
             </form>
         </div>
         <div class="container" id="mainContainer">
-            <h1>Todo List</h1>
-            <button id="themeToggle" class="theme-toggle">🌙</button>
+            <div class="header">
+                <h1>Todo List</h1>
+                <div class="header-controls">
+                    <button id="authButton" class="auth-button">Войти</button>
+                    <button id="themeToggle" class="theme-toggle" aria-label="Переключить тему">🌙</button>
+                </div>
+            </div>
             <form id="todoForm">
                 <input type="text" id="todoInput" placeholder="Что нужно сделать?" required>
-                <input type="date" id="dueDateInput" title="Срок выполнения" min="" aria-label="Дата выполнения">
+                <input type="date" id="dueDateInput" min="" aria-label="Дата выполнения">
                 <select id="prioritySelect">
                     <option value="low">Низкий</option>
                     <option value="medium" selected>Средний</option>

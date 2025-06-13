@@ -76,6 +76,32 @@ body {
     position: relative; 
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.auth-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.auth-button:hover {
+    background-color: var(--button-hover);
+}
+
 h1 {
     text-align: center;
     color: var(--text-color);
@@ -395,24 +421,13 @@ button:hover {
 }
 
 .theme-toggle {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: transparent;
-    border: 2px solid var(--border-color);
-    width: 40px;
-    height: 40px; 
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 0;
-    transition: all 0.3s ease;
+    padding: 8px;
+    border: none;
     transform: rotate(0deg);
+    background-color: transparent;
     color: var(--text-color);
-    background: var(--item-bg);
-    display: flex;
-    justify-content: center;
-    align-items: center
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .theme-toggle:hover {

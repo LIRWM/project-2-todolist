@@ -1,4 +1,4 @@
-import { authService } from './service/auth.js';
+import { authService } from './services/auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const todoForm = document.getElementById('todoForm');
@@ -23,6 +23,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const showLoginLink = document.getElementById('showLogin');
     const userEmailSpan = document.getElementById('userEmail');
     const logoutButton = document.getElementById('logoutButton');
+    const authButton = document.getElementById('authButton');
+
+    let isDarkTheme = false;
+
+    themeToggle.addEventListener('click', () => {
+        isDarkTheme = !isDarkTheme;
+        document.body.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
+        themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+    });
+
+    authButton.addEventListener('click', () => {
+        const authContainer = document.getElementById('authContainer');
+        const blurredBg = document.getElementById('blurredBg');
+        const mainContainer = document.getElementById('mainContainer');
+
+        authContainer.classList.remove('hidden');
+        blurredBg.classList.remove('hidden');
+        mainContainer.classList.add('blur');
+    })
 
     showRegisterLink.addEventListener('click', (e) => {
         e.preventDefault();
@@ -87,6 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContainer.classList.remove('blur');
         if (authService.currentUser) {
             userEmailSpan.textContent = authService.currentUser.email;
+            todoForm.style.display = 'flex';
+            document.querySelector('.controls').style.display = 'flex';
+            document.querySelector('todo-stats').style.display = 'block';
+            document.querySelector('.user-controls').style.display = 'flex';
+        } else {
+            todoForm.style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            document.querySelector('todo-stats').style.display = 'none';
+            document.querySelector('.user-controls').style.display = 'none';
         }
     }
 

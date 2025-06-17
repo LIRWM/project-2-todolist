@@ -16,7 +16,7 @@
                 <button type="submit">Войти</button>
                 <p>Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a></p>
             </form>
-            <form class="auth-form hidden" id="registerForm">
+            <form class="auth-form" id="registerForm">
                 <h2>Регистрация</h2>
                 <input type="email" id="registerEmail" placeholder="Email" required>
                 <input type="password" id="registerPassword" placeholder="Пароль" required>
@@ -29,6 +29,11 @@
             <div class="header">
                 <h1>Todo List</h1>
                 <div class="header-controls">
+                    <div class="user-info hidden">
+                        <img src="default-avatar.svg" alt="Avatar" class="user-avatar" id="userAvatar">
+                        <span id="userEmail"></span>
+                        <button id="logoutButton" class="logout-button" aria-label="Выйти">🚪</button>
+                    </div>
                     <button id="authButton" class="auth-button">Войти</button>
                     <button id="themeToggle" class="theme-toggle" aria-label="Переключить тему">🌙</button>
                 </div>
@@ -73,10 +78,7 @@
                 </div>
             </div>
             <ul id="todoList"></ul>
-            <div class="user-controls">
-                <span id="userEmail"></span>
-                <button id="logoutButton">Выйти</button>
-            </div>
+            <!-- Удаляем старый блок user-controls -->
         </div>
         <script src="services/index.js" type="module"></script>
         <script src="script.js" type="module"></script>

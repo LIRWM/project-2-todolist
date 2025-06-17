@@ -1,6 +1,13 @@
 import { authService } from './services/auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const showRegisterLink = document.getElementById('showRegister');
+    const showLoginLink = document.getElementById('showLogin');
+    const userEmailSpan = document.getElementById('userEmail');
+    const logoutButton = document.getElementById('logoutButton');
+    const authButton = document.getElementById('authButton');
     const todoForm = document.getElementById('todoForm');
     const todoInput = document.getElementById('todoInput');
     const dueDateInput = document.getElementById('dueDateInput');
@@ -17,31 +24,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const archiveButton = document.getElementById('archiveButton');
     const authContainer = document.getElementById('authContainer');
     const mainContainer = document.getElementById('mainContainer');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const showRegisterLink = document.getElementById('showRegister');
-    const showLoginLink = document.getElementById('showLogin');
-    const userEmailSpan = document.getElementById('userEmail');
-    const logoutButton = document.getElementById('logoutButton');
-    const authButton = document.getElementById('authButton');
 
-    let isDarkTheme = false;
+    if (!authService.checkAuth()) {
+        mainContainer.classList.add("hidden");
+        document.querySelector('.user-info').classList.add("hidden");
+        authButton.classList.remove("hidden");
+    } else {
+        authContainer.classList.add("hidden");
+        mainContainer.classList.remove("hidden");
+        document.querySelector('.user-info').classList.remove("hidden");
+        authButton.classList.add("hidden");
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser) {
+            userEmailSpan.textContent = currentUser.email;
+        }
+    }
+    let isDarkTheme = localStorage.getItem('theme') === 'dark';
+    if (isDarkTheme) {
+        document.body.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☀️';
+    }
 
     themeToggle.addEventListener('click', () => {
         isDarkTheme = !isDarkTheme;
         document.body.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
         themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+        localStorage.setItem('theme', isDarkTheme? 'dark' : 'light');
     });
 
     authButton.addEventListener('click', () => {
-        const authContainer = document.getElementById('authContainer');
-        const blurredBg = document.getElementById('blurredBg');
-        const mainContainer = document.getElementById('mainContainer');
-
-        authContainer.classList.remove('hidden');
-        blurredBg.classList.remove('hidden');
-        mainContainer.classList.add('blur');
-    })
+        showAuth();
+    });
 
     showRegisterLink.addEventListener('click', (e) => {
         e.preventDefault();
@@ -82,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await authService.login(email, password);
             showApp();
+            mainContainer.classList.remove('hidden');
         } catch(error) {
             alert(error.message);
         }
@@ -89,6 +103,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     logoutButton.addEventListener('click', async () => {
         authService.logout();
+        mainContainer.classList.add('hidden');
+        document.querySelector('.user-info').classList.add('hidden');
+        authButton.classList.remove('hidden');
+        authContainer.classList.remove('hidden');
+        todoForm.style.display = 'none';
+        document.querySelector('.controls').style.display = 'none';
+        document.querySelector('.todo-stats').style.display = 'none';
         showAuth();
     });
 
@@ -97,32 +118,44 @@ document.addEventListener('DOMContentLoaded', () => {
         authContainer.classList.remove('hidden');
         blurredBg.classList.remove('hidden');
         mainContainer.classList.add('blur');
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        authButton.classList.add('hidden');
     }
 
     function showApp() {
         const blurredBg = document.getElementById('blurredBg');
         authContainer.classList.add('hidden');
         blurredBg.classList.add('hidden');
+        mainContainer.classList.remove('hidden');
         mainContainer.classList.remove('blur');
+        
         if (authService.currentUser) {
             userEmailSpan.textContent = authService.currentUser.email;
+            document.querySelector('.user-info').classList.remove('hidden');
             todoForm.style.display = 'flex';
             document.querySelector('.controls').style.display = 'flex';
-            document.querySelector('todo-stats').style.display = 'block';
-            document.querySelector('.user-controls').style.display = 'flex';
+            document.querySelector('.todo-stats').style.display = 'block';
+            authButton.classList.add('hidden');
         } else {
+            document.querySelector('.user-info').classList.add('hidden');
             todoForm.style.display = 'none';
             document.querySelector('.controls').style.display = 'none';
-            document.querySelector('todo-stats').style.display = 'none';
-            document.querySelector('.user-controls').style.display = 'none';
+            document.querySelector('.todo-stats').style.display = 'none';
+            authButton.classList.remove('hidden');
         }
     }
 
     if (authService.checkAuth()) {
         showApp();
-    } else { 
-        showAuth();
+    } else {
+        // Скрываем элементы управления
+        todoForm.style.display = 'none';
+        document.querySelector('.controls').style.display = 'none';
+        document.querySelector('.todo-stats').style.display = 'none';
+        document.querySelector('.user-controls').style.display = 'none';
     }
+
 
 
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
@@ -212,18 +245,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        isDarkTheme = savedTheme === 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+    }
 
     themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        isDarkTheme = !isDarkTheme;
+        const theme = isDarkTheme ? 'dark' : 'light';
+        document.body.setAttribute('data-theme', theme);
+        themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+        localStorage.setItem('theme', isDarkTheme? 'dark' : 'light');
+    });
 
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-    })
+    authButton.addEventListener('click', showAuth);
 
     function createTodoElement(todo) {
         const li  = document.createElement('li');
@@ -501,19 +538,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    todoForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const text = todoInput.value.trim();
-        const priority = prioritySelect.value;
+    todoForm.addEventListener('submit', (e) => {
+        e.preventDefault(); // Предотвращаем перезагрузку страницы
+        
+        const todoText = todoInput.value.trim();
         const dueDate = dueDateInput.value;
+        const priority = prioritySelect.value;
         const category = categorySelect.value;
 
-        if (text) {
-            todos.push({ text, completed: false, priority, dueDate: dueDate || null, category: category || null });
+        if (todoText) {
+            const todo = {
+                id: Date.now(),
+                text: todoText,
+                completed: false,
+                dueDate: dueDate || null,
+                priority,
+                category,
+                userEmail: authService.currentUser?.email
+            };
+
+            todos.push(todo);
+            saveTodos();
+            renderTodos();
             todoInput.value = '';
             dueDateInput.value = '';
-            renderTodos();
-            saveTodos();
+            prioritySelect.value = 'medium';
+            categorySelect.value = '';
         }
     });
 

@@ -33,6 +33,7 @@ class AuthService {
 
         this.isAuthenticated = true;
         this.currentUser = { email: username };
+        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
         return this.currentUser;
 
     }
@@ -42,13 +43,20 @@ class AuthService {
         localStorage.removeItem(`todos_${this.currentUser?.email}`);
         localStorage.removeItem(`archivedTodos_${this.currentUser?.email}`);
         localStorage.removeItem(`categories_${this.currentUser?.email}`);
+        localStorage.removeItem('currentUser');
         
         this.isAuthenticated = false;
         this.currentUser = null;
     }
 
     checkAuth() {
-        return this.isAuthenticated;
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            this.currentUser = JSON.parse(savedUser);
+            this.isAuthenticated = true;
+            return true;
+        }
+        return false;
     }
 }
 

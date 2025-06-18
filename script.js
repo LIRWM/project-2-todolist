@@ -160,9 +160,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    let todos = JSON.parse(localStorage.getItem('todos')) || [];
-    let archivedTodos = JSON.parse(localStorage.getItem('archivedTodos')) || [];
-    let categories = JSON.parse(localStorage.getItem('categories')) || [];
+    let todos = [];
+    let archivedTodos = [];
+    let categories = [];
+    
+    if (authService.currentUser) {
+        const userEmail = authService.currentUser.email;
+        todos = JSON.parse(localStorage.getItem(`todos_${userEmail}`)) || [];
+        archivedTodos = JSON.parse(localStorage.getItem(`archivedTodos_${userEmail}`)) || [];
+        categories = JSON.parse(localStorage.getItem(`categories_${userEmail}`)) || [];
+    }
 
     function updateStats() {
         if (totalTasks) {
@@ -181,12 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
 
-    function saveTodos() {
+    async function saveTodos() {
         const userEmail = authService.currentUser?.email;
         if (userEmail) {
-        localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
-        updateStats();
+            try {
+                localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
+                updateStats();
+                return true;
+            } catch (error) {
+                console.error('Ошибка при сохранении задач:', error);
+                return false;
+            }
         }
+        return false;
     }
     
     function saveArchivedTodos() {
@@ -209,30 +223,30 @@ document.addEventListener('DOMContentLoaded', () => {
             todos = JSON.parse(localStorage.getItem(`todos_${userEmail}`)) || [];
             archivedTodos = JSON.parse(localStorage.getItem(`archivedTodos_${userEmail}`)) || [];
             categories = JSON.parse(localStorage.getItem(`categories_${userEmail}`)) || [];
-            updateTodoList();
+            renderTodos();
             updateStats();
             updateCategorySelect();
         }
     }
 
-    authService.addAuthStateListener((isAuthenticated) => {
-        if (isAuthenticated) {
-            loadUserData();
-        } else {
-            todos = [];
-            archivedTodos = [];
-            categories = [];
-            updateTodoList();
-            updateStats();
-            updateCategorySelect();
-        }
-    });
+    // authService.addAuthStateListener((isAuthenticated) => { // временно отключено до заполнение statistics.js
+        //if (isAuthenticated) {
+            //loadUserData();
+        //} else {
+            //todos = [];
+            //archivedTodos = [];
+            //categories = [];
+            //updateTodoList();
+            //updateStats();
+            //updateCategorySelect();
+        //}
+    //});
 
     addCategoryButton.addEventListener('click', () => {
         const categoryName = prompt('Введите название категории:');
         if (categoryName && categoryName.trim()) {
             const newCategory = {
-                id: Date.now(),
+                id: Date.now().toString(),
                 name: categoryName.trim()
             };
             categories.push(newCategory);
@@ -269,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     authButton.addEventListener('click', showAuth);
 
     function createTodoElement(todo) {
-        const li  = document.createElement('li');
+        const li = document.createElement('li');
         li.className = `todo-item priority-${todo.priority}`;
         if (todo.completed) li.classList.add('completed');
 
@@ -282,7 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const categorySpan = document.createElement('span');
         categorySpan.className = 'todo-category';
-        categorySpan.textContent = todo.category;
+        const category = categories.find(cat => cat.id === todo.categoryId);
+        categorySpan.textContent = category ? category.name : '';
 
         const dueDate = document.createElement('span')
         dueDate.className = 'due-date';
@@ -382,9 +397,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     archiveButton.addEventListener('click', () => {
-        const completedTodos  = todos.filter(todo => todo.completed).completed;
+        const completedTodos = todos.filter(todo => todo.completed);
         if (completedTodos.length > 0) {
-            archivedTodos = [...archivedTodos, ...completedTodos];
+            const archivedWithNotes = completedTodos.map(todo => ({
+                ...todo,
+                archiveDate: new Date().toISOString()
+            }));
+            archivedTodos = [...archivedTodos, ...archivedWithNotes];
             todos = todos.filter(todo => !todo.completed);
             saveArchivedTodos();
             saveTodos();
@@ -563,32 +582,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    todoForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // Предотвращаем перезагрузку страницы
+    todoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
         const todoText = todoInput.value.trim();
         const dueDate = dueDateInput.value;
         const priority = prioritySelect.value;
-        const category = categorySelect.value;
+        const categoryId = categorySelect.value;
 
-        if (todoText) {
+        if (todoText && authService.currentUser) {
             const todo = {
-                id: Date.now(),
+                id: Date.now().toString(),
                 text: todoText,
                 completed: false,
                 dueDate: dueDate || null,
                 priority,
-                category,
+                categoryId: categoryId || null,
                 userEmail: authService.currentUser?.email
             };
 
             todos.push(todo);
-            saveTodos();
+            await saveTodos();
             renderTodos();
             todoInput.value = '';
             dueDateInput.value = '';
             prioritySelect.value = 'medium';
             categorySelect.value = '';
+            updateStats();
+            return false;
         }
     });
 

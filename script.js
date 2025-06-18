@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContainer.classList.add("hidden");
         document.querySelector('.user-info').classList.add("hidden");
         authButton.classList.remove("hidden");
+        authContainer.classList.remove("hidden");
+        registerForm.classList.add("hidden")
     } else {
         authContainer.classList.add("hidden");
         mainContainer.classList.remove("hidden");
@@ -226,24 +228,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function updateCategorySelect() {
-        categorySelect.innerHTML = '<option value="">Без категории</option>';
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            categorySelect.appendChild(option);
-        });
-    }
-
     addCategoryButton.addEventListener('click', () => {
-        const category = prompt('Введите название категории:');
-        if (category && !categories.includes(category)) {
-            categories.push(category);
+        const categoryName = prompt('Введите название категории:');
+        if (categoryName && categoryName.trim()) {
+            const newCategory = {
+                id: Date.now(),
+                name: categoryName.trim()
+            };
+            categories.push(newCategory);
             saveCategories();
             updateCategorySelect();
         }
     });
+
+    function updateCategorySelect() {
+        categorySelect.innerHTML = '<option value="">Без категории</option>';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+        });
+    }
 
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
@@ -289,7 +295,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
-        editBtn.textContent = 'Изменить';
+        // добавил иконку вместо текста
+        const img = document.createElement('img');
+        img.src = "edit.svg";
+        img.alt = 'Изменить';
+        img.className = 'edit-icon';
+        
+        editBtn.appendChild(img);
+
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
@@ -368,7 +381,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(modal);
     }
 
-    archiveButton.addEventListener('click', showArchiveModal);
+    archiveButton.addEventListener('click', () => {
+        const completedTodos  = todos.filter(todo => todo.completed).completed;
+        if (completedTodos.length > 0) {
+            archivedTodos = [...archivedTodos, ...completedTodos];
+            todos = todos.filter(todo => !todo.completed);
+            saveArchivedTodos();
+            saveTodos();
+            renderTodos();
+            showArchiveModal();
+        } else {
+            alert('Нет выполненных задач для архивации');
+        }
+    });
 
     function archiveTodo(todo, index) {
         const note = prompt('Добавьте заметку о выполнении (необязательно):');

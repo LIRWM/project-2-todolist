@@ -229,18 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // authService.addAuthStateListener((isAuthenticated) => { // временно отключено до заполнение statistics.js
-        //if (isAuthenticated) {
-            //loadUserData();
-        //} else {
-            //todos = [];
-            //archivedTodos = [];
-            //categories = [];
-            //updateTodoList();
-            //updateStats();
-            //updateCategorySelect();
-        //}
-    //});
+
 
     addCategoryButton.addEventListener('click', () => {
         const categoryName = prompt('Введите название категории:');
@@ -620,3 +609,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStats(); 
 });
 
+authService.addAuthStateListener((isAuthenticated) => {
+    if (authService.currentUser && isAuthenticated) {
+        loadUserData();
+    } else {
+        todos = [];
+        archivedTodos = [];
+        categories = [];
+        updateTodoList();
+        updateStats();
+        updateCategorySelect();
+    }
+});

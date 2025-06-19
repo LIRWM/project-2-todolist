@@ -49,7 +49,7 @@ class StatisticsService {
 
             return [...categoryStats, uncategorizedStats];
         } catch (error) {
-            console.error('Ошибка при получении стастики по категориям:', error);
+            console.error('Ошибка при получении статистики по категориям:', error);
             throw error;
         }
     }
@@ -72,7 +72,7 @@ class StatisticsService {
 
             return {
                 dailyStats: dayStats,
-                averageCompetionTime: averageTime
+                averageCompletionTime: averageTime
             };
         } catch (error) {
             console.error('Ошибка при получении статистики продуктивности:', error);
@@ -106,18 +106,64 @@ class StatisticsService {
         const uncategorizedTodos = todos.filter(todo => !todo.categoryId);
         const completed = uncategorizedTodos.filter(todo => todo.completed).length;
 
-            return {
-                categoryId: null,
-                categoryName: 'Без категории',
-                total: uncategorizedTodos.length,
-                completed, 
-                active: uncategorizedTodos.length - completed,
-                completionRate: this.calculateCompletionRate(uncategorizedTodos)
+        return {
+            categoryId: null,
+            categoryName: 'Без категории',
+            total: uncategorizedTodos.length,
+            completed, 
+            active: uncategorizedTodos.length - completed,
+            completionRate: this.calculateCompletionRate(uncategorizedTodos)
             };
         }
+        calculateDailyStats(todos) {
+            const dayStats = new Array(7).fill(0).map(() => ({ completed: 0, total: 0}));
+            const today = new Date();
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+        
+            todos.forEach(todo => {
+                this.updateDayStats(todo, dayStats, weekStart);
+        });
 
+        return dayStats.map((stats, index) => ({
+            day: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][index],
+            ...stats,
+            completionRate: stats.total ? (stats.completed / stats.total * 100).toFixed(1) : 0
+        }));
+    }
 
+    updateDayStats(todo, dayStats, weekStart) {
+        if (todo.completed && todo.completionDate) {
+            const completionDate = new Date(todo.completionDate);
+            if (completionDate >= weekStart) {
+                dayStats[completionDate.getDay()].completed++;
+            }
+        }
+        if (todo.creationDate) {
+            const creationDate = new Date(todo.creationDate);
+            if (creationDate >= weekStart) {
+                dayStats[creationDate.getDay()].total++;
+            }
+        }
+    }
 
+    calculteAverageCompletionTime(todos) {
+        // Посчитать среднее время, за которое задачи переходят из состояния "создана" в "выполнена".
+        const completionTimes = todos
+            .filter(todo => todo.completed && todo.completionDate && todo.creationDate)
+            .map(todo => new Date(todo.completionDate) - new Date(todo.creationDate));
+
+            const averageTimeMs = completionTimes.length
+            ? completionTimes.reduce((acc, curr) => acc + curr, 0) / completionTimes.length
+            : 0;
+
+            return {
+                milliseconds: Math.round(averageTimeMs),
+                hours: (averageTimeMs / (1000 * 60 *60)).toFixed(1)
+            };
+        }
 }
 
 export const statisticsService = new StatisticsService();
+

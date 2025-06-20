@@ -299,18 +299,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
-        // добавил иконку вместо текста
-        const img = document.createElement('img');
-        img.src = "edit.svg";
-        img.alt = 'Изменить';
-        img.className = 'edit-icon';
-        
-        editBtn.appendChild(img);
-
+        editBtn.innerHTML = '<i class="fas fa-pen"></i>';
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
-        deleteBtn.textContent = 'Удалить';
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
 
         li.appendChild(checkbox);
         li.appendChild(span);
@@ -385,23 +378,34 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(modal);
     }
 
-    archiveButton.addEventListener('click', () => {
+    
+
+    async function archiveCompletedTodos() {
         const completedTodos = todos.filter(todo => todo.completed);
-        if (completedTodos.length > 0) {
-            const archivedWithNotes = completedTodos.map(todo => ({
-                ...todo,
-                archiveDate: new Date().toISOString()
-            }));
-            archivedTodos = [...archivedTodos, ...archivedWithNotes];
-            todos = todos.filter(todo => !todo.completed);
-            saveArchivedTodos();
-            saveTodos();
-            renderTodos();
-            showArchiveModal();
-        } else {
+        if (completedTodos.length === 0) {
             alert('Нет выполненных задач для архивации');
         }
-    });
+
+        try { 
+            archivedTodos = [...archivedTodos, ...completedTodos];
+            todos = todos.filter(todo => !todo.completed);
+            
+            const userEmail = authService.currentUser?.email;
+            if (userEmail) {
+                localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
+                localStorage.setItem(`archivedTodos_${userEmail}`, JSON.stringify(archivedTodos));
+               
+                renderTodos();
+                updateStats();
+                showArchiveModal();
+            }
+        } catch (error) {
+            console.error('Ошибка при архивации задач:', error);
+            alert('Произошла ошибка при архивации задач');
+        }
+    };
+
+    archiveButton.addEventListener('click', archiveCompletedTodos);
 
     function archiveTodo(todo, index) {
         const note = prompt('Добавьте заметку о выполнении (необязательно):');
@@ -413,6 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveArchivedTodos();
         saveTodos();
         renderTodos();
+        
     }
 
     function filterAndSortTodos() {
@@ -512,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         input.remove();
                         dateInput?.remove();
                         span.style.display = '';
-                        editBtn.textContent = 'Изменить';
+                        editBtn.style.display = '';
                         editBtn.classList.remove('saving');
                     };
 

@@ -158,8 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.user-controls').style.display = 'none';
     }
 
-
-
     let todos = [];
     let archivedTodos = [];
     let categories = [];
@@ -178,12 +176,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (completedTasks) {
             const completed  = todos.filter(todo => todo.completed).length;
             completedTasks.textContent = completed;
-            if (progressFill) {
-                const percentage = todos.length > 0 ? (completed/todos.length) * 100 : 0;
+            if (progressFill && todos.length > 0) {
+                const percentage = (completed/todos.length) * 100;
                 progressFill.style.width = `${percentage}%`;
+            } else if (progressFill) {
+                progressFill.style.width = '0%';
             }
         }
     }
+    
 
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
@@ -228,8 +229,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateCategorySelect();
         }
     }
-
-
 
     addCategoryButton.addEventListener('click', () => {
         const categoryName = prompt('Введите название категории:');
@@ -335,10 +334,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const archiveList = document.createElement('div');
         archiveList.className = 'archive-list';
 
-       archivedTodos.forEach((todo, index) => {
+        archivedTodos.forEach((todo, index) => {
             const archiveItem = document.createElement('div');
             archiveItem.className = 'archive-item';
-        
+
             const number = document.createElement('span');
             number.className = 'archive-number';
             number.textContent = `${index + 1}. `;
@@ -347,26 +346,18 @@ document.addEventListener('DOMContentLoaded', () => {
             text.textContent = todo.text;
 
             const category = document.createElement('span');
-            category.className = 'todo-category';
-            category.textContent = todo.category || '';
-
-            const note = document.createElement('div');
-            note.className = 'archive-note';
-            note.textContent = todo.archiveNote || '';
+            category.className = 'archive-category';
+            category.textContent = todo.category || 'Без категории';   
 
             const date = document.createElement('span');
             date.className = 'archive-date';
-            if (todo.archiveDate) { 
-                const archiveDate = new Date(todo.archiveDate);
-                if (!isNaN(archiveDate.getTime())) { 
-                date.textContent = archiveDate.toLocaleDateString();
-                }
+            if (todo.archiveDate) {
+                date.textContent = new Date(todo.archiveDate).toLocaleDateString();
             }
 
             archiveItem.appendChild(number);
             archiveItem.appendChild(text);
-            if (todo.category) archiveItem.appendChild(category);
-            if (todo.archiveNote) archiveItem.appendChild(note);
+            archiveItem.appendChild(category);
             archiveItem.appendChild(date);
             archiveList.appendChild(archiveItem);
         });
@@ -384,20 +375,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const completedTodos = todos.filter(todo => todo.completed);
         if (completedTodos.length === 0) {
             alert('Нет выполненных задач для архивации');
+            // всегда отображается. это баг (у него всегда 0 выполненных, хотя по факту не 0)
         }
-
         try { 
-            archivedTodos = [...archivedTodos, ...completedTodos];
+            const archivedWithInfo = completedTodos.map(todo => {
+                const category = todo.categoryId ? 
+                    categories.find(cat => cat.id === todo.categoryId)?.name : 
+                    'Без категории';
+                return {
+                    ...todo,
+                    category,
+                    archiveDate: new Date().toISOString()
+                };
+            });
+            archivedTodos = [...archivedTodos, ...archivedWithInfo];
             todos = todos.filter(todo => !todo.completed);
             
             const userEmail = authService.currentUser?.email;
             if (userEmail) {
                 localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
                 localStorage.setItem(`archivedTodos_${userEmail}`, JSON.stringify(archivedTodos));
-               
-                renderTodos();
                 updateStats();
+                renderTodos();
                 showArchiveModal();
+
+                alert(`Архивировано задач: ${completedTodos.length}`); // зачем? но я увидел, что архивируются 0 задач
             }
         } catch (error) {
             console.error('Ошибка при архивации задач:', error);
@@ -408,8 +410,8 @@ document.addEventListener('DOMContentLoaded', () => {
     archiveButton.addEventListener('click', archiveCompletedTodos);
 
     function archiveTodo(todo, index) {
-        const note = prompt('Добавьте заметку о выполнении (необязательно):');
-        const todoToArchive = { ...todo, archiveNote: note, archiveDate: new Date().toISOString() };
+
+        const todoToArchive = { ...todo, archiveDate: new Date().toISOString() }; // нет категории + нехорошее расположение элементов
 
         archivedTodos.push(todoToArchive);
         todos.splice(index, 1);
@@ -454,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return filteredTodos;
     }
+
         function renderTodos() {
         if (!todoList) return;
 
@@ -484,82 +487,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            if (editBtn) {
+            if (editBtn){
                 editBtn.addEventListener('click', () => {
-                    const isEditing = li.querySelector('.edit-input');
-                    const saveChanges = () => {
+                    const isEditing = li.classList.contains('editing');
+                    if (isEditing) {
                         const input = li.querySelector('.edit-input');
-                        const dateInput = li.querySelector('.edit-date')
-                        if (!input) return;
-
-                        const newText = input.value.trim();
-                        const newDate = dateInput ? dateInput.value : todo.dueDate;
-
-                        if (newText) {
-                            todo.text = newText;
-                            todo.dueDate = newDate;
-                            span.textContent = newText;
-                            const dueDateElement = li.querySelector('.due-date');
-                            if (dueDateElement) {
-                                dueDateElement.style.display = '';
-                                if (newDate) {
-                                    dueDateElement.textContent = new Date(newDate).toLocaleDateString();
-                                    dueDateElement.classList.toggle('overdue', new Date(newDate) < new Date().setHours(0, 0, 0, 0));
-                                } else {
-                                    dueDateElement.textContent = '';
-                                    dueDateElement.classList.remove('overdue');
-                                }
-                            }
-                            span.classList.add('saved');
-                            setTimeout(() => span.classList.remove('saved'), 600);
+                        if (input && input.value.trim()) {
+                            todo.text = input.value.trim();
+                            span.textContent = todo.text;
+                            input.replaceWith(span);
+                            editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+                            li.classList.remove('editing');
                             saveTodos();
                         }
-                        input.remove();
-                        dateInput?.remove();
-                        span.style.display = '';
-                        editBtn.style.display = '';
-                        editBtn.classList.remove('saving');
-                    };
-
-                    if (!isEditing) {
+                    } else {
                         const input = document.createElement('input');
                         input.type = 'text';
                         input.className = 'edit-input';
                         input.value = todo.text;
-
-                        const dateInput = document.createElement('input');
-                        dateInput.type = 'date';
-                        dateInput.className = 'edit-date';
-                        dateInput.value = todo.dueDate || '';
-                        dateInput.min = today;
-
-
-                        span.style.display = 'none';
-                        const dueDate = li.querySelector('.due-date');
-                        if (dueDate) dueDate.style.display = 'none';
-
-  
-                        li.insertBefore(input, editBtn);                   
-                        li.insertBefore(dateInput, editBtn);   
+                        span.replaceWith(input);
                         input.focus();
-                        editBtn.textContent = 'Сохранить';
-                        editBtn.classList.add('saving');
-
-                        input.addEventListener('keypress', (e) => {
-                            if (e.key === "Enter") {
-                                saveChanges();
-                            }
-                        });
-                        dateInput.addEventListener('keypress', (e) => {
-                            if (e.key === "Enter") {
-                                saveChanges();
-                            }
-                        });
-                    } else {
-                        saveChanges();
+                        editBtn.innerHTML = '<i class="fas fa-check"></i>';
+                        li.classList.add('editing');
                     }
                 });
-            }    
+            }
 
             if (deleteBtn) {
                 deleteBtn.addEventListener('click', () => {
@@ -606,7 +558,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     });
-
+    function addAuthStateListener() {
+        authService.addAuthStateListener((isAuthenticated) => {
+        if (authService.currentUser && isAuthenticated) {
+            loadUserData();
+        } else {
+            todos = [];
+            archivedTodos = [];
+            categories = [];
+            updateTodoList();
+            updateStats();
+            updateCategorySelect();
+        }
+    });
+    }
     filterPriority.addEventListener('change', renderTodos);
     sortBy.addEventListener('change', renderTodos);
     updateCategorySelect();
@@ -614,15 +579,3 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStats(); 
 });
 
-authService.addAuthStateListener((isAuthenticated) => {
-    if (authService.currentUser && isAuthenticated) {
-        loadUserData();
-    } else {
-        todos = [];
-        archivedTodos = [];
-        categories = [];
-        updateTodoList();
-        updateStats();
-        updateCategorySelect();
-    }
-});

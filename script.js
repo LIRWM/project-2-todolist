@@ -340,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
         li.appendChild(editBtn);
         li.appendChild(deleteBtn);
  
-
         return li;
     }
 

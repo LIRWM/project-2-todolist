@@ -39,12 +39,8 @@ class AuthService {
     }
 
     logout() {
-        // Очистка данных пользователя из локального хранилища
-        localStorage.removeItem(`todos_${this.currentUser?.email}`);
-        localStorage.removeItem(`archivedTodos_${this.currentUser?.email}`);
-        localStorage.removeItem(`categories_${this.currentUser?.email}`);
+        // Сохраняем только состояние аутентификации
         localStorage.removeItem('currentUser');
-        
         this.isAuthenticated = false;
         this.currentUser = null;
     }

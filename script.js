@@ -125,6 +125,35 @@ document.addEventListener('DOMContentLoaded', () => {
         authButton.classList.add('hidden');
     }
 
+    let todos = [];
+    let archivedTodos = [];
+    let categories = [];
+
+    function initializeData() {
+        if (authService.currentUser?.email) {
+            const userEmail = authService.currentUser.email;
+            try {
+                const todosData = localStorage.getItem(`todos_${userEmail}`);
+                const archivedData = localStorage.getItem(`archivedTodos_${userEmail}`);
+                const categoriesData = localStorage.getItem(`categories_${userEmail}`);
+
+                todos = todosData ? JSON.parse(todosData) : [];
+                archivedTodos = archivedData ? JSON.parse(archivedData) : [];
+                categories = categoriesData ? JSON.parse(categoriesData) : [];
+
+                renderTodos();
+                updateStats();
+                updateCategorySelect();
+            } catch (error) {
+                console.error('Ошибка при инициализации данных:', error);
+                todos = [];
+                archivedTodos = [];
+                categories = [];
+            }
+        }
+    }
+
+    // Вызываем initializeData только при входе пользователя
     function showApp() {
         const blurredBg = document.getElementById('blurredBg');
         authContainer.classList.add('hidden');
@@ -139,12 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.controls').style.display = 'flex';
             document.querySelector('.todo-stats').style.display = 'block';
             authButton.classList.add('hidden');
-        } else {
-            document.querySelector('.user-info').classList.add('hidden');
-            todoForm.style.display = 'none';
-            document.querySelector('.controls').style.display = 'none';
-            document.querySelector('.todo-stats').style.display = 'none';
-            authButton.classList.remove('hidden');
+            initializeData(); // Инициализируем данные после успешной авторизации
         }
     }
 
@@ -158,29 +182,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.user-controls').style.display = 'none';
     }
 
-    let todos = [];
-    let archivedTodos = [];
-    let categories = [];
-    
-    if (authService.currentUser) {
-        const userEmail = authService.currentUser.email;
-        todos = JSON.parse(localStorage.getItem(`todos_${userEmail}`)) || [];
-        archivedTodos = JSON.parse(localStorage.getItem(`archivedTodos_${userEmail}`)) || [];
-        categories = JSON.parse(localStorage.getItem(`categories_${userEmail}`)) || [];
-    }
-
     function updateStats() {
+        if (!authService.currentUser?.email) return;
+
+        const activeTasks = todos.length;
+        const completedTasksCount = archivedTodos.length; // Используем длину архива
+        const totalTasksCount = activeTasks + completedTasksCount;
+
         if (totalTasks) {
-            totalTasks.textContent = todos.length;
+            totalTasks.textContent = totalTasksCount;
         }
         if (completedTasks) {
-            const completed  = todos.filter(todo => todo.completed).length;
-            completedTasks.textContent = completed;
-            if (progressFill && todos.length > 0) {
-                const percentage = (completed/todos.length) * 100;
+            completedTasks.textContent = completedTasksCount;
+            if (progressFill) {
+                const percentage = totalTasksCount > 0 ? 
+                    (completedTasksCount / totalTasksCount) * 100 : 0;
                 progressFill.style.width = `${percentage}%`;
-            } else if (progressFill) {
-                progressFill.style.width = '0%';
             }
         }
     }
@@ -191,30 +208,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function saveTodos() {
         const userEmail = authService.currentUser?.email;
-        if (userEmail) {
-            try {
-                localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
-                updateStats();
-                return true;
-            } catch (error) {
-                console.error('Ошибка при сохранении задач:', error);
-                return false;
-            }
+        if (!userEmail) return false;
+
+        try {
+            localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
+            updateStats();
+            return true;
+        } catch (error) {
+            console.error('Ошибка при сохранении задач:', error);
+            return false;
         }
-        return false;
     }
-    
+
     function saveArchivedTodos() {
         const userEmail = authService.currentUser?.email;
-        if (userEmail) {
+        if (!userEmail) return false;
+
+        try {
             localStorage.setItem(`archivedTodos_${userEmail}`, JSON.stringify(archivedTodos));
+            updateStats();
+            return true;
+        } catch (error) {
+            console.error('Ошибка при сохранении архива:', error);
+            return false;
         }
     }
-    
+
     function saveCategories() {
         const userEmail = authService.currentUser?.email;
-        if (userEmail) {
+        if (!userEmail) return false;
+
+        try {
             localStorage.setItem(`categories_${userEmail}`, JSON.stringify(categories));
+            return true;
+        } catch (error) {
+            console.error('Ошибка при сохранении категорий:', error);
+            return false;
         }
     }
 
@@ -285,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const categorySpan = document.createElement('span');
         categorySpan.className = 'todo-category';
         const category = categories.find(cat => cat.id === todo.categoryId);
-        categorySpan.textContent = category ? category.name : '';
+        categorySpan.textContent = category ? category.name : 'Без категории';
 
         const dueDate = document.createElement('span')
         dueDate.className = 'due-date';
@@ -347,7 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const category = document.createElement('span');
             category.className = 'archive-category';
-            category.textContent = todo.category || 'Без категории';   
+            const todoCategory = categories.find(cat => cat.id === todo.categoryId);
+            category.textContent = todoCategory ? todoCategory.name : 'Без категории';
 
             const date = document.createElement('span');
             date.className = 'archive-date';
@@ -372,47 +402,40 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     async function archiveCompletedTodos() {
-        const completedTodos = todos.filter(todo => todo.completed);
-        if (completedTodos.length === 0) {
+        if (archivedTodos.length === 0) {
             alert('Нет выполненных задач для архивации');
-            // всегда отображается. это баг (у него всегда 0 выполненных, хотя по факту не 0)
+            return;
         }
-        try { 
-            const archivedWithInfo = completedTodos.map(todo => {
-                const category = todo.categoryId ? 
-                    categories.find(cat => cat.id === todo.categoryId)?.name : 
-                    'Без категории';
-                return {
-                    ...todo,
-                    category,
-                    archiveDate: new Date().toISOString()
-                };
-            });
+        const completedTodos = todos.filter(todo => todo.completed);
+        try {
+            const archivedWithInfo = completedTodos.map(todo => ({
+                ...todo,
+                archiveDate: new Date().toISOString()
+            }));
+
             archivedTodos = [...archivedTodos, ...archivedWithInfo];
             todos = todos.filter(todo => !todo.completed);
-            
-            const userEmail = authService.currentUser?.email;
-            if (userEmail) {
-                localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
-                localStorage.setItem(`archivedTodos_${userEmail}`, JSON.stringify(archivedTodos));
-                updateStats();
-                renderTodos();
-                showArchiveModal();
 
-                alert(`Архивировано задач: ${completedTodos.length}`); // зачем? но я увидел, что архивируются 0 задач
+            if (await saveTodos() && await saveArchivedTodos()) {
+                renderTodos();
+                updateStats();
+                showArchiveModal();
             }
         } catch (error) {
-            console.error('Ошибка при архивации задач:', error);
+            console.error('Ошибка при архивации:', error);
             alert('Произошла ошибка при архивации задач');
         }
-    };
+    }
 
     archiveButton.addEventListener('click', archiveCompletedTodos);
 
     function archiveTodo(todo, index) {
 
-        const todoToArchive = { ...todo, archiveDate: new Date().toISOString() }; // нет категории + нехорошее расположение элементов
-
+        const todoToArchive = {
+            ...todo,
+            archiveDate: new Date().toISOString()
+        };
+        
         archivedTodos.push(todoToArchive);
         todos.splice(index, 1);
         
@@ -557,21 +580,19 @@ document.addEventListener('DOMContentLoaded', () => {
             updateStats();
             return false;
         }
-    });
-    function addAuthStateListener() {
+    })
         authService.addAuthStateListener((isAuthenticated) => {
-        if (authService.currentUser && isAuthenticated) {
-            loadUserData();
-        } else {
-            todos = [];
-            archivedTodos = [];
-            categories = [];
-            updateTodoList();
-            updateStats();
-            updateCategorySelect();
-        }
-    });
-    }
+            if (authService.currentUser && isAuthenticated) {
+                loadUserData();
+            } else {
+                todos = [];
+                archivedTodos = [];
+                categories = [];
+                updateTodoList();
+                updateStats();
+                updateCategorySelect();
+            }
+        });
     filterPriority.addEventListener('change', renderTodos);
     sortBy.addEventListener('change', renderTodos);
     updateCategorySelect();

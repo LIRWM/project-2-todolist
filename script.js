@@ -81,6 +81,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (password.length < 6) {
+            alert('Пароль должен содержать минимум 6 символов');
+            return;
+        }
+        const hasLetter = /[a-zA-Z]/.test(password);
+        if (!hasLetter) {
+            alert('Нужна хотя бы одна буква');
+            return;
+        }
+        const hasDigit = /\d/.test(password);
+        if (!hasDigit) { 
+            alert('Нужна хотя бы одна цифра');
+            return;
+        }
+        const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+        if (!hasSymbol) {
+            alert('Нужен спецсимвол');
+            return;
+        }
+
         try {
             await authService.register(email, password);
             showApp();

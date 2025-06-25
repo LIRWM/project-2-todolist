@@ -1,4 +1,5 @@
 import { authService } from './services/auth.js';
+import { archiveTodo } from './services/archiveService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -78,26 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (password !== confirmPassword) {
             alert('Пароли не совпадают');
-            return;
-        }
-
-        if (password.length < 6) {
-            alert('Пароль должен содержать минимум 6 символов');
-            return;
-        }
-        const hasLetter = /[a-zA-Z]/.test(password);
-        if (!hasLetter) {
-            alert('Нужна хотя бы одна буква');
-            return;
-        }
-        const hasDigit = /\d/.test(password);
-        if (!hasDigit) { 
-            alert('Нужна хотя бы одна цифра');
-            return;
-        }
-        const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-        if (!hasSymbol) {
-            alert('Нужен спецсимвол');
             return;
         }
 
@@ -360,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         li.appendChild(editBtn);
         li.appendChild(deleteBtn);
  
+
         return li;
     }
 
@@ -448,22 +430,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     archiveButton.addEventListener('click', archiveCompletedTodos);
 
-    function archiveTodo(todo, index) {
+///////////////////////////////////////////////////////////
 
-        const todoToArchive = {
-            ...todo,
-            archiveDate: new Date().toISOString()
-        };
-        
-        archivedTodos.push(todoToArchive);
-        todos.splice(index, 1);
-        
-        saveArchivedTodos();
-        saveTodos();
-        renderTodos();
-        
-    }
-
+/////////////////////////////////////////////////////////////
     function filterAndSortTodos() {
         let filteredTodos = [...todos];
 
@@ -519,7 +488,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         li.classList.add('completed');
                         li.classList.add('fade-out');
                         setTimeout(() => {
-                            archiveTodo(todo, index);
+                                const result = archiveTodo(todos, archivedTodos, todo, index);
+                                saveTodos(result.updatedTodos);
+                                saveArchivedTodos(result.updatedArchivedTodos);
+                                renderTodos(result.updatedTodos);
+                                updateStats(result.updatedTodos);
                         }, 500);
                     } else {
                         todo.completed = false;
@@ -600,6 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     })
+    
         authService.addAuthStateListener((isAuthenticated) => {
             if (authService.currentUser && isAuthenticated) {
                 loadUserData();

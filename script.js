@@ -1,6 +1,7 @@
 import { authService } from './services/auth.js';
 import { archiveTodo } from './services/archiveService.js';
 import { showArchiveModal } from './ui/archiveModal.js';
+import { validatePassword } from './utils/validatePassword.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -78,30 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        if (password !== confirmPassword) {
-            alert('Пароли не совпадают');
+        //////////////////////
+        const errors = validatePassword(password, confirmPassword);
+        if (errors.length > 0) {
+            alert(errors.join('\n'));
             return;
         }
-        if (password.length < 6) {
-            alert('Пароль должен содержать минимум 6 символов');
-            return;
-        }
-        const hasLetter = /[a-zA-Z]/.test(password);
-        if (!hasLetter) {
-            alert('Нужна хотя бы одна буква');
-            return;
-        }
-        const hasDigit = /\d/.test(password);
-        if (!hasDigit) { 
-            alert('Нужна хотя бы одна цифра');
-            return;
-        }
-        const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-        if (!hasSymbol) {
-            alert('Нужен спецсимвол');
-            return;
-        }
-
         try {
             await authService.register(email, password);
             showApp();

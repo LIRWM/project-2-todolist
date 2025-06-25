@@ -2,6 +2,7 @@ import { authService } from './services/auth.js';
 import { archiveTodo } from './services/archiveService.js';
 import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
+import { themeToggle } from './ui/themeToggle.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterPriority = document.getElementById('filterPriority');
     const sortBy = document.getElementById('sortBy');
     const progressFill = document.getElementById('progressFill');
-    const themeToggle = document.getElementById('themeToggle');
+
     const categorySelect = document.getElementById('categorySelect');
     const addCategoryButton = document.getElementById('addCategoryButton');
     const archiveButton = document.getElementById('archiveButton');
@@ -44,19 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
             userEmailSpan.textContent = currentUser.email;
         }
     }
-    let isDarkTheme = localStorage.getItem('theme') === 'dark';
-    if (isDarkTheme) {
-        document.body.setAttribute('data-theme', 'dark');
-        themeToggle.textContent = '☀️';
-    }
-
-    themeToggle.addEventListener('click', () => {
-        isDarkTheme = !isDarkTheme;
-        document.body.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
-        themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
-        localStorage.setItem('theme', isDarkTheme? 'dark' : 'light');
-    });
-
+    themeToggle();
+    
     authButton.addEventListener('click', () => {
         showAuth();
     });
@@ -92,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(error.message);
         }
     });
+
+    
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -205,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
 
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
@@ -286,20 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        isDarkTheme = savedTheme === 'dark';
-        document.body.setAttribute('data-theme', savedTheme);
-        themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
-    }
 
-    themeToggle.addEventListener('click', () => {
-        isDarkTheme = !isDarkTheme;
-        const theme = isDarkTheme ? 'dark' : 'light';
-        document.body.setAttribute('data-theme', theme);
-        themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
-        localStorage.setItem('theme', isDarkTheme? 'dark' : 'light');
-    });
 
     authButton.addEventListener('click', showAuth);
 

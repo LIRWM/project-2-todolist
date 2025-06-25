@@ -148,7 +148,7 @@ class StatisticsService {
         }
     }
 
-    calculteAverageCompletionTime(todos) {
+    calculateAverageCompletionTime(todos) {
         // Посчитать среднее время, за которое задачи переходят из состояния "создана" в "выполнена".
         const completionTimes = todos
             .filter(todo => todo.completed && todo.completionDate && todo.creationDate)

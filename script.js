@@ -1,5 +1,5 @@
 import { authService } from './services/auth.js';
-import { archiveTodo } from './services/archiveService.js';
+import { archiveTodo, saveArchivedTodos } from './services/archiveService.js';
 import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
@@ -199,22 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function saveArchivedTodos() {
-        const userEmail = authService.currentUser?.email;
-        if (!userEmail) return false;
-
-        try {
-            localStorage.setItem(`archivedTodos_${userEmail}`, JSON.stringify(archivedTodos));
-            updateStats(todos, archivedTodos);
-            return true;
-        } catch (error) {
-            console.error('Ошибка при сохранении архива:', error);
-            return false;
-        }
-    }
-
-
-
     function loadUserData() {
         const userEmail = authService.currentUser?.email;
         if (userEmail) {
@@ -319,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
             archivedTodos = [...archivedTodos, ...archivedWithInfo];
             todos = todos.filter(todo => !todo.completed);
 
-            if (await saveTodos() && await saveArchivedTodos()) {
+            if (await saveTodos() && await saveArchivedTodos(todos, archivedTodos)) {
                 renderTodos();
                 updateStats(todos, archivedTodos);
                 showArchiveModal(archivedTodos, categories);
@@ -358,9 +342,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         setTimeout(() => {
                                 const result = archiveTodo(todos, archivedTodos, todo, index);
                                 saveTodos(result.updatedTodos);
-                                saveArchivedTodos(result.updatedArchivedTodos);
-                                renderTodos(result.updatedTodos);
-                                updateStats(result.updatedTodos, todos, archivedTodos);
+                                saveArchivedTodos(result.updatedTodos, result.updatedArchivedTodos);
+                                renderTodos(result.updatedTodos, result.updatedArchivedTodos);
+                                updateStats(result.updatedTodos, result.updatedArchivedTodos);
                         }, 500);
                     } else {
                         todo.completed = false;

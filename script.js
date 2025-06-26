@@ -4,7 +4,7 @@ import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
 import { updateStats } from './ui/updateStats.js';
-import { filterAndSortTodos } from './services/todoService.js';
+import { filterAndSortTodos, saveTodos } from './services/todoService.js';
 import { saveCategories } from './services/CategoryService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -185,19 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
 
-    async function saveTodos() {
-        const userEmail = authService.currentUser?.email;
-        if (!userEmail) return false;
 
-        try {
-            localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
-            updateStats(todos, archivedTodos);
-            return true;
-        } catch (error) {
-            console.error('Ошибка при сохранении задач:', error);
-            return false;
-        }
-    }
 
     function loadUserData() {
         const userEmail = authService.currentUser?.email;
@@ -303,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             archivedTodos = [...archivedTodos, ...archivedWithInfo];
             todos = todos.filter(todo => !todo.completed);
 
-            if (await saveTodos() && await saveArchivedTodos(todos, archivedTodos)) {
+            if (await saveTodos(todos, archivedTodos) && await saveArchivedTodos(todos, archivedTodos)) {
                 renderTodos();
                 updateStats(todos, archivedTodos);
                 showArchiveModal(archivedTodos, categories);
@@ -341,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         li.classList.add('fade-out');
                         setTimeout(() => {
                                 const result = archiveTodo(todos, archivedTodos, todo, index);
-                                saveTodos(result.updatedTodos);
+                                saveTodos(todos, archivedTodos);
                                 saveArchivedTodos(result.updatedTodos, result.updatedArchivedTodos);
                                 renderTodos(result.updatedTodos, result.updatedArchivedTodos);
                                 updateStats(result.updatedTodos, result.updatedArchivedTodos);
@@ -350,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         todo.completed = false;
                         li.classList.remove('completed');
                     }
-                    saveTodos();
+                    saveTodos(todos, archivedTodos);
                 });
             }
 
@@ -365,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             input.replaceWith(span);
                             editBtn.innerHTML = '<i class="fas fa-pen"></i>';
                             li.classList.remove('editing');
-                            saveTodos();
+                            saveTodos(todos, archivedTodos);
                         }
                     } else {
                         const input = document.createElement('input');
@@ -386,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => { 
                         todos.splice(index, 1);
                         renderTodos();
-                        saveTodos();
+                        saveTodos(todos, archivedTodos);
                     }, 300);
                 });
             }
@@ -415,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             todos.push(todo);
-            await saveTodos();
+            await saveTodos(todos, archivedTodos);
             renderTodos();
             todoInput.value = '';
             dueDateInput.value = '';

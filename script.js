@@ -3,6 +3,7 @@ import { archiveTodo } from './services/archiveService.js';
 import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
+import { updateStats } from './ui/updateStats.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -16,12 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const todoInput = document.getElementById('todoInput');
     const dueDateInput = document.getElementById('dueDateInput');
     const todoList = document.getElementById('todoList');
-    const totalTasks = document.getElementById('totalTasks');
-    const completedTasks = document.getElementById('completedTasks');
+
     const prioritySelect = document.getElementById('prioritySelect');
     const filterPriority = document.getElementById('filterPriority');
     const sortBy = document.getElementById('sortBy');
-    const progressFill = document.getElementById('progressFill');
+
 
     const categorySelect = document.getElementById('categorySelect');
     const addCategoryButton = document.getElementById('addCategoryButton');
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     themeToggle();
-    
+
     authButton.addEventListener('click', () => {
         showAuth();
     });
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 categories = categoriesData ? JSON.parse(categoriesData) : [];
 
                 renderTodos();
-                updateStats();
+                updateStats(todos, archivedTodos);
                 updateCategorySelect();
             } catch (error) {
                 console.error('Ошибка при инициализации данных:', error);
@@ -178,25 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.user-controls').style.display = 'none';
     }
 
-    function updateStats() {
-        if (!authService.currentUser?.email) return;
 
-        const activeTasks = todos.length;
-        const completedTasksCount = archivedTodos.length; // Используем длину архива
-        const totalTasksCount = activeTasks + completedTasksCount;
-
-        if (totalTasks) {
-            totalTasks.textContent = totalTasksCount;
-        }
-        if (completedTasks) {
-            completedTasks.textContent = completedTasksCount;
-            if (progressFill) {
-                const percentage = totalTasksCount > 0 ? 
-                    (completedTasksCount / totalTasksCount) * 100 : 0;
-                progressFill.style.width = `${percentage}%`;
-            }
-        }
-    }
 
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
@@ -207,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
-            updateStats();
+            updateStats(todos, archivedTodos);
             return true;
         } catch (error) {
             console.error('Ошибка при сохранении задач:', error);
@@ -221,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             localStorage.setItem(`archivedTodos_${userEmail}`, JSON.stringify(archivedTodos));
-            updateStats();
+            updateStats(todos, archivedTodos);
             return true;
         } catch (error) {
             console.error('Ошибка при сохранении архива:', error);
@@ -249,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             archivedTodos = JSON.parse(localStorage.getItem(`archivedTodos_${userEmail}`)) || [];
             categories = JSON.parse(localStorage.getItem(`categories_${userEmail}`)) || [];
             renderTodos();
-            updateStats();
+            updateStats(todos, archivedTodos);
             updateCategorySelect();
         }
     }
@@ -348,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (await saveTodos() && await saveArchivedTodos()) {
                 renderTodos();
-                updateStats();
+                updateStats(todos, archivedTodos);
                 showArchiveModal(archivedTodos, categories);
             }
         } catch (error) {
@@ -421,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 saveTodos(result.updatedTodos);
                                 saveArchivedTodos(result.updatedArchivedTodos);
                                 renderTodos(result.updatedTodos);
-                                updateStats(result.updatedTodos);
+                                updateStats(result.updatedTodos, todos, archivedTodos);
                         }, 500);
                     } else {
                         todo.completed = false;
@@ -498,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dueDateInput.value = '';
             prioritySelect.value = 'medium';
             categorySelect.value = '';
-            updateStats();
+            updateStats(todos, archivedTodos);
             return false;
         }
     })
@@ -511,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 archivedTodos = [];
                 categories = [];
                 updateTodoList();
-                updateStats();
+                updateStats(todos, archivedTodos);
                 updateCategorySelect();
             }
         });
@@ -519,6 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
     sortBy.addEventListener('change', renderTodos);
     updateCategorySelect();
     renderTodos();
-    updateStats(); 
+    updateStats(todos, archivedTodos); 
 });
 

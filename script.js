@@ -4,6 +4,7 @@ import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
 import { updateStats } from './ui/updateStats.js';
+import { filterAndSortTodos } from './services/todoService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -344,46 +345,13 @@ document.addEventListener('DOMContentLoaded', () => {
 ///////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////
-    function filterAndSortTodos() {
-        let filteredTodos = [...todos];
+    
 
-        if (filterPriority.value !== 'all') {
-            filteredTodos = filteredTodos.filter(todo => todo.priority === filterPriority.value);
-        }
-
-        switch(sortBy.value) {
-            case 'priority':
-                const priorityOrder = {high: 1, medium: 2, low: 3};
-                filteredTodos.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
-                break;
-            case 'name':
-                filteredTodos.sort((a, b) => a.text.localeCompare(b.text));
-                break;
-            case 'dueDate':
-                filteredTodos.sort((a, b) => {
-                    if (!a.dueDate && !b.dueDate) return 0;
-                    if (!a.dueDate) return 1;
-                    if (!b.dueDate) return -1;
-                    return new Date(a.dueDate) - new Date(b.dueDate);
-                });
-                break; 
-            case 'category':
-                filteredTodos.sort((a, b) => {
-                    if (!a.category && !b.category) return 0;
-                    if (!a.category) return 1;
-                    if (!b.category) return -1;
-                    return a.category.localeCompare(b.category);
-                });
-                break;
-            }
-            return filteredTodos;
-    }
-
-        function renderTodos() {
+    function renderTodos() {
         if (!todoList) return;
 
         todoList.innerHTML = '';
-        const filteredTodos = filterAndSortTodos();
+        const filteredTodos = filterAndSortTodos(todos, filterPriority.value, sortBy.value, categories);
         filteredTodos.forEach((todo, index) => {
             const li = createTodoElement(todo);
             const checkbox = li.querySelector('input[type="checkbox"]');
@@ -393,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (checkbox) {
                 checkbox.addEventListener('change', () => {
-                    const todo = todos[index];
                     if (!todo.completed) {
                         todo.completed = true;
                         li.classList.add('completed');
@@ -485,18 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })
 
-        authService.addAuthStateListener((isAuthenticated) => {
-            if (authService.currentUser && isAuthenticated) {
-                loadUserData();
-            } else {
-                todos = [];
-                archivedTodos = [];
-                categories = [];
-                updateTodoList();
-                updateStats(todos, archivedTodos);
-                updateCategorySelect();
-            }
-        });
+ 
     filterPriority.addEventListener('change', renderTodos);
     sortBy.addEventListener('change', renderTodos);
     updateCategorySelect();

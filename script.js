@@ -5,6 +5,7 @@ import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
 import { updateStats } from './ui/updateStats.js';
 import { filterAndSortTodos } from './services/todoService.js';
+import { saveCategories } from './services/CategoryService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -212,18 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function saveCategories() {
-        const userEmail = authService.currentUser?.email;
-        if (!userEmail) return false;
 
-        try {
-            localStorage.setItem(`categories_${userEmail}`, JSON.stringify(categories));
-            return true;
-        } catch (error) {
-            console.error('Ошибка при сохранении категорий:', error);
-            return false;
-        }
-    }
 
     function loadUserData() {
         const userEmail = authService.currentUser?.email;
@@ -245,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 name: categoryName.trim()
             };
             categories.push(newCategory);
-            saveCategories();
+            saveCategories(categories);
             updateCategorySelect();
         }
     });

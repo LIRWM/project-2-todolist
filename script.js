@@ -177,18 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
 
-    function loadUserData() {
-        const userEmail = authService.currentUser?.email;
-        if (userEmail) {
-            todos = JSON.parse(localStorage.getItem(`todos_${userEmail}`)) || [];
-            archivedTodos = JSON.parse(localStorage.getItem(`archivedTodos_${userEmail}`)) || [];
-            categories = JSON.parse(localStorage.getItem(`categories_${userEmail}`)) || [];
-            renderTodos(todos, archivedTodos, categories);
-            updateStats(todos, archivedTodos);
-            updateCategorySelect();
-        }
-    }
-
     addCategoryButton.addEventListener('click', () => {
         const categoryName = prompt('Введите название категории:');
         if (categoryName && categoryName.trim()) {

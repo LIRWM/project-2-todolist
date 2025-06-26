@@ -1,12 +1,12 @@
 import { authService } from './services/auth.js';
-import { archiveTodo, saveArchivedTodos } from './services/archiveService.js';
+import { saveArchivedTodos } from './services/archiveService.js';
 import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
 import { updateStats } from './ui/updateStats.js';
-import { filterAndSortTodos, saveTodos } from './services/todoService.js';
+import { saveTodos } from './services/todoService.js';
 import { saveCategories } from './services/CategoryService.js';
-import { createTodoElement } from './ui/todoElement.js';
+import { renderTodos } from './ui/renderTodos.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -19,13 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const todoForm = document.getElementById('todoForm');
     const todoInput = document.getElementById('todoInput');
     const dueDateInput = document.getElementById('dueDateInput');
-    const todoList = document.getElementById('todoList');
-
     const prioritySelect = document.getElementById('prioritySelect');
     const filterPriority = document.getElementById('filterPriority');
     const sortBy = document.getElementById('sortBy');
-
-
     const categorySelect = document.getElementById('categorySelect');
     const addCategoryButton = document.getElementById('addCategoryButton');
     const archiveButton = document.getElementById('archiveButton');
@@ -72,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        //////////////////////
         const errors = validatePassword(password, confirmPassword);
         if (errors.length > 0) {
             alert(errors.join('\n'));
@@ -85,8 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(error.message);
         }
     });
-
-    
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -140,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 archivedTodos = archivedData ? JSON.parse(archivedData) : [];
                 categories = categoriesData ? JSON.parse(categoriesData) : [];
 
-                renderTodos();
+                renderTodos(todos, archivedTodos, categories);
                 updateStats(todos, archivedTodos);
                 updateCategorySelect();
             } catch (error) {
@@ -181,12 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.user-controls').style.display = 'none';
     }
 
-
-
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
-
-
 
     function loadUserData() {
         const userEmail = authService.currentUser?.email;
@@ -194,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             todos = JSON.parse(localStorage.getItem(`todos_${userEmail}`)) || [];
             archivedTodos = JSON.parse(localStorage.getItem(`archivedTodos_${userEmail}`)) || [];
             categories = JSON.parse(localStorage.getItem(`categories_${userEmail}`)) || [];
-            renderTodos();
+            renderTodos(todos, archivedTodos, categories);
             updateStats(todos, archivedTodos);
             updateCategorySelect();
         }
@@ -223,16 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
-
     authButton.addEventListener('click', showAuth);
-
-
-
-/////////////////////////////////////////
-/////////////////////////////////////////
-
-    
 
     async function archiveCompletedTodos() {
         if (archivedTodos.length === 0) {
@@ -250,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
             todos = todos.filter(todo => !todo.completed);
 
             if (await saveTodos(todos, archivedTodos) && await saveArchivedTodos(todos, archivedTodos)) {
-                renderTodos();
+                renderTodos(todos, archivedTodos, categories);
                 updateStats(todos, archivedTodos);
                 showArchiveModal(archivedTodos, categories);
             }
@@ -261,85 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     archiveButton.addEventListener('click', archiveCompletedTodos);
-
-///////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////
-    
-
-    function renderTodos() {
-        if (!todoList) return;
-
-        todoList.innerHTML = '';
-        const filteredTodos = filterAndSortTodos(todos, filterPriority.value, sortBy.value, categories);
-        filteredTodos.forEach((todo, index) => {
-            const li = createTodoElement(todo, categories);
-            const checkbox = li.querySelector('input[type="checkbox"]');
-            const deleteBtn = li.querySelector('.delete-btn');
-            const editBtn = li.querySelector('.edit-btn');
-            const span = li.querySelector('span');
-
-            if (checkbox) {
-                checkbox.addEventListener('change', () => {
-                    if (!todo.completed) {
-                        todo.completed = true;
-                        li.classList.add('completed');
-                        li.classList.add('fade-out');
-                        setTimeout(() => {
-                                const result = archiveTodo(todos, archivedTodos, todo, index);
-                                saveTodos(todos, archivedTodos);
-                                saveArchivedTodos(result.updatedTodos, result.updatedArchivedTodos);
-                                renderTodos(result.updatedTodos, result.updatedArchivedTodos);
-                                updateStats(result.updatedTodos, result.updatedArchivedTodos);
-                        }, 500);
-                    } else {
-                        todo.completed = false;
-                        li.classList.remove('completed');
-                    }
-                    saveTodos(todos, archivedTodos);
-                });
-            }
-
-            if (editBtn){
-                editBtn.addEventListener('click', () => {
-                    const isEditing = li.classList.contains('editing');
-                    if (isEditing) {
-                        const input = li.querySelector('.edit-input');
-                        if (input && input.value.trim()) {
-                            todo.text = input.value.trim();
-                            span.textContent = todo.text;
-                            input.replaceWith(span);
-                            editBtn.innerHTML = '<i class="fas fa-pen"></i>';
-                            li.classList.remove('editing');
-                            saveTodos(todos, archivedTodos);
-                        }
-                    } else {
-                        const input = document.createElement('input');
-                        input.type = 'text';
-                        input.className = 'edit-input';
-                        input.value = todo.text;
-                        span.replaceWith(input);
-                        input.focus();
-                        editBtn.innerHTML = '<i class="fas fa-check"></i>';
-                        li.classList.add('editing');
-                    }
-                });
-            }
-
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', () => {
-                    li.classList.add('deleting');
-                    setTimeout(() => { 
-                        todos.splice(index, 1);
-                        renderTodos();
-                        saveTodos(todos, archivedTodos);
-                    }, 300);
-                });
-            }
-            
-            todoList.appendChild(li);
-        });
-    }
 
     todoForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -362,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             todos.push(todo);
             await saveTodos(todos, archivedTodos);
-            renderTodos();
+            renderTodos(todos, archivedTodos, categories);
             todoInput.value = '';
             dueDateInput.value = '';
             prioritySelect.value = 'medium';
@@ -372,11 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })
 
- 
-    filterPriority.addEventListener('change', renderTodos);
-    sortBy.addEventListener('change', renderTodos);
+    filterPriority.addEventListener('change', () => renderTodos(todos, archivedTodos, categories));
+    sortBy.addEventListener('change', () => renderTodos(todos, archivedTodos, categories));
     updateCategorySelect();
-    renderTodos();
+    renderTodos(todos, archivedTodos, categories);
     updateStats(todos, archivedTodos); 
 });
-

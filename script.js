@@ -7,6 +7,7 @@ import { updateStats } from './ui/updateStats.js';
 import { saveTodos } from './services/todoService.js';
 import { saveCategories } from './services/CategoryService.js';
 import { renderTodos } from './ui/renderTodos.js';
+import { updateCategorySelect } from './ui/categoryDropdown.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -22,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const prioritySelect = document.getElementById('prioritySelect');
     const filterPriority = document.getElementById('filterPriority');
     const sortBy = document.getElementById('sortBy');
-    const categorySelect = document.getElementById('categorySelect');
     const addCategoryButton = document.getElementById('addCategoryButton');
     const archiveButton = document.getElementById('archiveButton');
     const authContainer = document.getElementById('authContainer');
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 renderTodos(todos, archivedTodos, categories);
                 updateStats(todos, archivedTodos);
-                updateCategorySelect();
+                updateCategorySelect(categories);
             } catch (error) {
                 console.error('Ошибка при инициализации данных:', error);
                 todos = [];
@@ -186,19 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             categories.push(newCategory);
             saveCategories(categories);
-            updateCategorySelect();
+            updateCategorySelect(categories);
         }
     });
 
-    function updateCategorySelect() {
-        categorySelect.innerHTML = '<option value="">Без категории</option>';
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
-            categorySelect.appendChild(option);
-        });
-    }
+
 
     authButton.addEventListener('click', showAuth);
 
@@ -263,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filterPriority.addEventListener('change', () => renderTodos(todos, archivedTodos, categories));
     sortBy.addEventListener('change', () => renderTodos(todos, archivedTodos, categories));
-    updateCategorySelect();
+    updateCategorySelect(categories);
     renderTodos(todos, archivedTodos, categories);
     updateStats(todos, archivedTodos); 
 });

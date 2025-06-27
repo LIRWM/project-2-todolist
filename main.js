@@ -8,6 +8,7 @@ import { saveTodos } from './services/todoService.js';
 import { saveCategories } from './services/CategoryService.js';
 import { renderTodos } from './ui/renderTodos.js';
 import { updateCategorySelect } from './ui/categoryDropdown.js';
+import { showAlert } from './ui/alert.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -77,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await authService.register(email, password);
             showApp();
         } catch (error) {
-            alert(error.message);
+            showAlert('Ошибка при авторизации!', 'error');
         }
     });
 
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showApp();
             mainContainer.classList.remove('hidden');
         } catch(error) {
-            alert(error.message);
+            showAlert('Ошибка при авторизации!', 'error');
         }
     });
 
@@ -171,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
         todoForm.style.display = 'none';
         document.querySelector('.controls').style.display = 'none';
         document.querySelector('.todo-stats').style.display = 'none';
-        document.querySelector('.user-controls').style.display = 'none';
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function archiveCompletedTodos() {
         if (archivedTodos.length === 0) {
-            alert('Нет выполненных задач для архивации');
+            showAlert('Нет выполненных задач для архивации', 'error');
             return;
         }
         const completedTodos = todos.filter(todo => todo.completed);
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Ошибка при архивации:', error);
-            alert('Произошла ошибка при архивации задач');
+            showAlert('Произошла ошибка при архивации задач', 'error');
         }
     }
 

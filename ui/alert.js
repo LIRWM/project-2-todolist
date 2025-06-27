@@ -1,7 +1,7 @@
 export function showAlert(message, type = 'error') {
     const alertBox = document.createElement('div');
     alertBox.className = `alert alert-${type}`;
-    alertBox.textContent = message;
+    alertBox.innerText = message;
 
     document.body.appendChild(alertBox);
 

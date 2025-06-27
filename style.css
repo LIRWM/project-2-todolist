@@ -783,3 +783,11 @@ button:hover {
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     opacity: 0.95;
 }
+
+.custom-alert.success {
+    background: #2ecc71;
+}
+
+.custom-alert.error {
+    background: #e74c3c;
+}

@@ -17,10 +17,5 @@ export function validatePassword(password, confirmPassword) {
         errors.push('Нужен спецсимвол');
     }
 
-    if (errors.length > 0) {
-        alert(errors.join('\n'));
-    }
-
-
         return errors;
 }

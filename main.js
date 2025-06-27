@@ -71,14 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const errors = validatePassword(password, confirmPassword);
         if (errors.length > 0) {
-            alert(errors.join('\n'));
+            showAlert(errors.join('\n'));
             return;
         }
         try {
             await authService.register(email, password);
             showApp();
         } catch (error) {
-            showAlert('Ошибка при авторизации!', 'error');
+            showAlert('error', 'Ошибка при авторизации!');
         }
     });
 

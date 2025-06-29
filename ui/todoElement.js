@@ -1,7 +1,9 @@
 export function createTodoElement(todo, categories) {
+    const isOverdue = todo.dueDate && new Date(todo.dueDate) < new Date().setHours(0, 0, 0, 0);
     const li = document.createElement('li');
     li.className = `todo-item priority-${todo.priority}`;
     if (todo.completed) li.classList.add('completed');
+    if (isOverdue) li.classList.add('overdue');
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -19,9 +21,7 @@ export function createTodoElement(todo, categories) {
     dueDate.className = 'due-date';
     if (todo.dueDate) {
         dueDate.textContent = new Date(todo.dueDate).toLocaleDateString();
-        if (new Date(todo.dueDate) < new Date().setHours(0, 0, 0, 0)) {
-            dueDate.classList.add('overdue');
-        }
+        if (isOverdue) dueDate.classList.add('overdue');
     }
 
     const editBtn = document.createElement('button');

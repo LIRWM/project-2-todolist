@@ -200,9 +200,15 @@ button:hover {
     color: var(--text-color);
 }
 
-.todo-item .due-date.overdue {
+.todo-item.overdue {
     color: #fff;
-    background: var(--overdue-bg);
+    background-color: var(--overdue-bg, #2b2b2b);
+    border-left: 4px solid #e63946;
+}
+
+.todo-item.overdue .due-date {
+    font-weight: bold;
+    color: #ffbaba;
 }
 
 .todo-item.priority-low {

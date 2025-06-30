@@ -3,9 +3,9 @@ export function setupCategoryModal(categories, saveCategories, updateCategorySel
     const input = document.getElementById('newCategoryInput');
     const saveBtn = document.getElementById('saveCategoryBtn');
     const cancelBtn = document.getElementById('cancelCategoryBtn');
-    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const addCategoryBtn = document.getElementById('addCategoryButton');
 
-    addCategoryBtn('click', () => {
+    addCategoryBtn.addEventListener('click', () => {
         input.value = '';
         modal.style.display = 'flex';
         input.focus();

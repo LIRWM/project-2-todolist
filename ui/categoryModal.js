@@ -11,17 +11,31 @@ export function setupCategoryModal(categories, saveCategories, updateCategorySel
         input.focus();
     });
 
+    // Закрытие модалки
     cancelBtn.addEventListener('click', () => {
         modal.style.display = 'none';
     });
 
+    // Сохранение новой категории
     saveBtn.addEventListener('click', () => {
         const newCategory = input.value.trim();
-        if (newCategory && !categories.includes(newCategory)) {
-            categories.push(newCategory);
-            saveCategories(categories);
-            updateCategorySelect(categories);
+
+        // Проверка на пустую строку
+        if (!newCategory) {
+            modal.style.display = 'none';
+            return;
         }
+
+        // Проверка на дубликат
+        if (categories.includes(newCategory)) {
+            alert('Такая категория уже существует');
+            return;
+        }
+
+        // Добавление
+        categories.push(newCategory);
+        saveCategories(categories);
+        updateCategorySelect(categories);
         modal.style.display = 'none';
     });
 }

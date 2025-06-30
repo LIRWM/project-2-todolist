@@ -11,6 +11,7 @@ import { updateCategorySelect } from './ui/categoryDropdown.js';
 import { setupCategoryModal } from './ui/categoryModal.js';
 import { showAlert } from './ui/alert.js';
 
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
@@ -166,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    setupCategoryModal(categories, saveCategories, updateCategorySelect);
 
     if (authService.checkAuth()) {
         showApp();
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
 
-    
+    setupCategoryModal(categories, saveCategories, updateCategorySelect);
 
     authButton.addEventListener('click', showAuth);
 

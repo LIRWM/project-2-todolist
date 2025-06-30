@@ -8,8 +8,8 @@ import { saveTodos } from './services/todoService.js';
 import { saveCategories } from './services/CategoryService.js';
 import { renderTodos } from './ui/renderTodos.js';
 import { updateCategorySelect } from './ui/categoryDropdown.js';
-import { showAlert } from './ui/alert.js';
 import { setupCategoryModal } from './ui/categoryModal.js';
+import { showAlert } from './ui/alert.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const prioritySelect = document.getElementById('prioritySelect');
     const filterPriority = document.getElementById('filterPriority');
     const sortBy = document.getElementById('sortBy');
-    const addCategoryButton = document.getElementById('addCategoryButton');
     const archiveButton = document.getElementById('archiveButton');
     const authContainer = document.getElementById('authContainer');
     const mainContainer = document.getElementById('mainContainer');
@@ -163,8 +162,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.todo-stats').style.display = 'block';
             authButton.classList.add('hidden');
             initializeData(); // Инициализируем данные после успешной авторизации
+            
         }
     }
+    
+    setupCategoryModal(categories, saveCategories, updateCategorySelect);
 
     if (authService.checkAuth()) {
         showApp();
@@ -178,20 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
 
-    addCategoryButton.addEventListener('click', () => {
-        const categoryName = prompt('Введите название категории:');
-        if (categoryName && categoryName.trim()) {
-            const newCategory = {
-                id: Date.now().toString(),
-                name: categoryName.trim()
-            };
-            categories.push(newCategory);
-            saveCategories(categories);
-            updateCategorySelect(categories);
-        }
-    });
-
-    setupCategoryModal(categories, saveCategories, updateCategorySelect);
+    
 
     authButton.addEventListener('click', showAuth);
 

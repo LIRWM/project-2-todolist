@@ -19,8 +19,8 @@ export function setupCategoryModal(categories, saveCategories, updateCategorySel
         const newCategory = input.value.trim();
         if (newCategory && !categories.includes(newCategory)) {
             categories.push(newCategory);
-            saveCategories();
-            updateCategorySelect();
+            saveCategories(categories);
+            updateCategorySelect(categories);
         }
         modal.style.display = 'none';
     });

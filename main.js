@@ -9,6 +9,7 @@ import { saveCategories } from './services/CategoryService.js';
 import { renderTodos } from './ui/renderTodos.js';
 import { updateCategorySelect } from './ui/categoryDropdown.js';
 import { showAlert } from './ui/alert.js';
+import { setupCategoryModal } from './ui/categoryModal.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -190,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
+    setupCategoryModal(categories, saveCategories, updateCategorySelect);
 
     authButton.addEventListener('click', showAuth);
 

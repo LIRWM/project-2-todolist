@@ -19,7 +19,12 @@ export function loadCategories() {
 
     try {
         const data = localStorage.getItem(`categories_${userEmail}`);
-        return data ? JSON.parse(data) : [];
+        const raw = data ? JSON.parse(data) : [];
+
+        // Преобразуем старые строки в объекты
+        return raw.map(cat => 
+            typeof cat === 'string' ? { id: Date.now().toString(), name: cat } : cat
+        );
     } catch (error) {
         console.error('Ошибка при загрузке категорий:', error);
         return [];

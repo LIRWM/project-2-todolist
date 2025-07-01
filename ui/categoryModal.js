@@ -42,6 +42,12 @@ export function setupCategoryModal(categories, saveCategories, updateCategorySel
         };
 
         categories.push(newCategory);
+        
+        categories.sort((a, b) => {
+            const nameA = typeof a === 'string' ? a : a.name;
+            const nameB = typeof b === 'string' ? b : b.name;
+            return nameA.localeCompare(nameB);
+        });
         saveCategories(categories);
         updateCategorySelect(categories);
         modal.style.display = 'none';

@@ -1,3 +1,5 @@
+import { showAlert } from '../ui/alert.js';
+
 export function setupCategoryModal(categories, saveCategories, updateCategorySelect) {
     const modal = document.getElementById('categoryModal');
     const input = document.getElementById('newCategoryInput');
@@ -11,28 +13,34 @@ export function setupCategoryModal(categories, saveCategories, updateCategorySel
         input.focus();
     });
 
-    // Закрытие модалки
     cancelBtn.addEventListener('click', () => {
         modal.style.display = 'none';
     });
 
-    // Сохранение новой категории
     saveBtn.addEventListener('click', () => {
-        const newCategory = input.value.trim();
+        const categoryName = input.value.trim();
 
-        // Проверка на пустую строку
-        if (!newCategory) {
-            modal.style.display = 'none';
+        if (!categoryName) {
+            showAlert('Название категории не может быть пустым.');
             return;
         }
 
-        // Проверка на дубликат
-        if (categories.includes(newCategory)) {
-            alert('Такая категория уже существует');
+        const isDuplicate = categories.some(category => {
+            return typeof category === 'string'
+                ? category === categoryName
+                : category.name === categoryName;
+        });
+
+        if (isDuplicate) {
+            showAlert('Такая категория уже существует.');
             return;
         }
 
-        // Добавление
+        const newCategory = {
+            id: Date.now().toString(),
+            name: categoryName
+        };
+
         categories.push(newCategory);
         saveCategories(categories);
         updateCategorySelect(categories);

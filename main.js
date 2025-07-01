@@ -5,7 +5,7 @@ import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
 import { updateStats } from './ui/updateStats.js';
 import { saveTodos } from './services/todoService.js';
-import { saveCategories } from './services/CategoryService.js';
+import { saveCategories, loadCategories } from './services/CategoryService.js';
 import { renderTodos } from './ui/renderTodos.js';
 import { updateCategorySelect } from './ui/categoryDropdown.js';
 import { setupCategoryModal } from './ui/categoryModal.js';
@@ -129,12 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const todosData = localStorage.getItem(`todos_${userEmail}`);
                 const archivedData = localStorage.getItem(`archivedTodos_${userEmail}`);
-                const categoriesData = localStorage.getItem(`categories_${userEmail}`);
 
                 todos = todosData ? JSON.parse(todosData) : [];
                 archivedTodos = archivedData ? JSON.parse(archivedData) : [];
-                categories = categoriesData ? JSON.parse(categoriesData) : [];
+                categories = loadCategories();
 
+                setupCategoryModal(categories, saveCategories, updateCategorySelect);
                 renderTodos(todos, archivedTodos, categories);
                 updateStats(todos, archivedTodos);
                 updateCategorySelect(categories);
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     dueDateInput.min = today;
 
-    setupCategoryModal(categories, saveCategories, updateCategorySelect);
+    
 
     authButton.addEventListener('click', showAuth);
 

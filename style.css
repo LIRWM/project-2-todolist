@@ -552,25 +552,46 @@ button:hover {
 }
 
 .archive-item {
-    padding: 15px;
-    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
     background: var(--item-bg);
     border-radius: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    line-height: 1.5;
     border: 1px solid var(--border-color);
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.archive-text {
+    font-size: 16px;
+    color: var(--text-color);
+    flex: 1;
+    max-width: 50%;
+}
+
+.archive-category {
+    font-size: 0.85em;
+    padding: 4px 10px;
+    background: var(--category-bg);
+    color: var(--category-text);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    text-align: center;
+    margin: 0 auto;
 }
 
 .archive-date {
-    margin-left: auto;
     color: var(--due-date-color);
     font-size: 0.9em;
     padding: 4px 10px;
     background: var(--due-date-bg);
     border-radius: 12px;
+    min-width: 100px;
+    text-align: center;
 }
 
 .archive-list {

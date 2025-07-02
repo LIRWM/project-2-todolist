@@ -26,6 +26,7 @@
             number.textContent = `${index + 1}. `;
 
             const text = document.createElement('span');
+            text.className = 'archive-text';
             text.textContent = todo.text;
 
             const category = document.createElement('span');

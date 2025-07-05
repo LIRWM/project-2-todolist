@@ -9,7 +9,7 @@ import { renderTodos } from './ui/renderTodos.js';
 import { updateCategorySelect } from './ui/categoryDropdown.js';
 import { setupCategoryModal } from './ui/categoryModal.js';
 import { showAlert } from './ui/alert.js';
-import { getArchivedTodos, addToArchive, deleteToArchiveTodo } from './services/archiveApiService';
+import { getArchivedTodos, addToArchive, deleteToArchiveTodo } from './services/archiveApiService.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -191,8 +191,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
-            const archivedWithInfo  = completedTodos.map(archivedTodo);
-            await Promise.all(archivedWithInfo.map(todo => addToArchive(todo)));
+            const archivedWithInfo = completedTodos.map(todo => ({
+            ...todo,
+            archiveDate: new Date().toISOString()
+        }));
+
+        await Promise.all(archivedWithInfo.map(todo => addToArchive(todo)));
             
             todos = todos.filter(todo => !todo.completed);
             await saveTodos(todos);

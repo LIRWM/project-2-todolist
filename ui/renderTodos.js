@@ -1,15 +1,18 @@
 import { updateStats } from '../ui/updateStats.js';
 import { saveTodos, filterAndSortTodos } from '../services/todoService.js';
 import { createTodoElement } from '../ui/todoElement.js';
-import { archiveTodo, saveArchivedTodos } from '../services/archiveService.js';
+import { addToArchive, getArchivedTodos } from '../services/archiveApiService.js';
 
-export function renderTodos(todos, archivedTodos, categories) {
+export async function renderTodos(todos, archivedTodos, categories) {
     const todoList = document.getElementById('todoList');
     if (!todoList) return;
 
     todoList.innerHTML = '';
+
     const filteredTodos = filterAndSortTodos(todos, filterPriority.value, sortBy.value, categories);
-    filteredTodos.forEach((todo, index) => {
+
+    for (let index = 0; index < filteredTodos.length; index++) {
+        const todo = filteredTodos[index];
         const li = createTodoElement(todo, categories);
         const checkbox = li.querySelector('input[type="checkbox"]');
         const deleteBtn = li.querySelector('.delete-btn');
@@ -17,27 +20,42 @@ export function renderTodos(todos, archivedTodos, categories) {
         const span = li.querySelector('span');
 
         if (checkbox) {
-            checkbox.addEventListener('change', () => {
+            checkbox.addEventListener('change', async () => {
                 if (!todo.completed) {
                     todo.completed = true;
                     li.classList.add('completed');
                     li.classList.add('fade-out');
-                    setTimeout(() => {
-                        const result = archiveTodo(todos, archivedTodos, todo, index);
-                        saveTodos(todos, archivedTodos);
-                        saveArchivedTodos(result.updatedTodos, result.updatedArchivedTodos);
-                        renderTodos(result.updatedTodos, result.updatedArchivedTodos, categories);
-                        updateStats(result.updatedTodos, result.updatedArchivedTodos);
+
+                    setTimeout(async () => {
+                        try {
+                            const archivedTodo = {
+                                ...todo,
+                                archiveDate: new Date().toISOString()
+                            };
+
+                            await addToArchive(archivedTodo);
+                            todos = todos.filter(t => t.id !== todo.id);
+
+                            archivedTodos = await getArchivedTodos();
+                            await saveTodos(todos, archivedTodos);
+
+                            const result = await renderTodos(todos, archivedTodos, categories);
+                            todos = result.todos;
+                            archivedTodos = result.archivedTodos;
+                            updateStats(todos, archivedTodos);
+                        } catch (error) {
+                            console.error('Ошибка при архивации задачи:', error);
+                        }
                     }, 500);
                 } else {
                     todo.completed = false;
                     li.classList.remove('completed');
+                    await saveTodos(todos, archivedTodos);
                 }
-                saveTodos(todos, archivedTodos);
             });
         }
 
-        if (editBtn){
+        if (editBtn) {
             editBtn.addEventListener('click', () => {
                 const isEditing = li.classList.contains('editing');
                 if (isEditing) {
@@ -50,7 +68,7 @@ export function renderTodos(todos, archivedTodos, categories) {
                         li.classList.remove('editing');
                         saveTodos(todos, archivedTodos);
                     }
-                } else {                        
+                } else {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'edit-input';
@@ -66,14 +84,16 @@ export function renderTodos(todos, archivedTodos, categories) {
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => {
                 li.classList.add('deleting');
-                setTimeout(() => { 
-                    todos.splice(index, 1);
+                setTimeout(() => {
+                    todos = todos.filter(t => t.id !== todo.id);
                     renderTodos(todos, archivedTodos, categories);
                     saveTodos(todos, archivedTodos);
                 }, 300);
             });
         }
-            
+
         todoList.appendChild(li);
-    });
+    }
+
+    return { todos, archivedTodos };
 }

@@ -5,7 +5,7 @@ export  async function getTodos() {
     return await res.json();
 }
 
-export  async function addTodos() {
+export  async function addTodos(todo) {
     const res = await fetch(BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

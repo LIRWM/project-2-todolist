@@ -1,5 +1,4 @@
 import { authService } from './services/auth.js';
-import { saveArchivedTodos } from './services/archiveService.js';
 import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
@@ -185,25 +184,24 @@ document.addEventListener('DOMContentLoaded', () => {
     authButton.addEventListener('click', showAuth);
 
     async function archiveCompletedTodos() {
+        const completedTodos = todos.filter(todo => todo.completed);
         if (archivedTodos.length === 0) {
             showAlert('Нет выполненных задач для архивации', 'error');
             return;
         }
-        const completedTodos = todos.filter(todo => todo.completed);
+        
         try {
-            const archivedWithInfo = completedTodos.map(todo => ({
-                ...todo,
-                archiveDate: new Date().toISOString()
-            }));
-
-            archivedTodos = [...archivedTodos, ...archivedWithInfo];
+            const archivedWithInfo  = completedTodos.map(archivedTodo);
+            await Promise.all(archivedWithInfo.map(todo => addToArchive(todo)));
+            
             todos = todos.filter(todo => !todo.completed);
+            await saveTodos(todos);
 
-            if (await saveTodos(todos, archivedTodos) && await saveArchivedTodos(todos, archivedTodos)) {
-                renderTodos(todos, archivedTodos, categories);
-                updateStats(todos, archivedTodos);
-                showArchiveModal(archivedTodos, categories);
-            }
+            archivedTodos = await getArchivedTodos();
+
+            renderTodos(todos, archivedTodos, categories);
+            updateStats(todos, archivedTodos);
+            showArchiveModal(archivedTodos, categories);
         } catch (error) {
             console.error('Ошибка при архивации:', error);
             showAlert('Произошла ошибка при архивации задач', 'error');

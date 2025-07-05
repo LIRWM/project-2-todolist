@@ -1,5 +1,6 @@
 {
   "todos": [],
   "users": [],
-  "categories": []
+  "categories": [],
+  "archivedTodos": []
 }

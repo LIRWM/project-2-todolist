@@ -10,6 +10,7 @@ import { renderTodos } from './ui/renderTodos.js';
 import { updateCategorySelect } from './ui/categoryDropdown.js';
 import { setupCategoryModal } from './ui/categoryModal.js';
 import { showAlert } from './ui/alert.js';
+import { getArchivedTodos, addToArchive, deleteToArchiveTodo } from './services/archiveApiService';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -123,15 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let archivedTodos = [];
     let categories = [];
 
-    function initializeData() {
+    async function initializeData() {
         if (authService.currentUser?.email) {
             const userEmail = authService.currentUser.email;
             try {
                 const todosData = localStorage.getItem(`todos_${userEmail}`);
-                const archivedData = localStorage.getItem(`archivedTodos_${userEmail}`);
 
                 todos = todosData ? JSON.parse(todosData) : [];
-                archivedTodos = archivedData ? JSON.parse(archivedData) : [];
+                archivedTodos = await getArchivedTodos();
                 categories = loadCategories();
 
                 setupCategoryModal(categories, saveCategories, updateCategorySelect);
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Вызываем initializeData только при входе пользователя
-    function showApp() {
+    async function showApp() {
         const blurredBg = document.getElementById('blurredBg');
         authContainer.classList.add('hidden');
         blurredBg.classList.add('hidden');
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.controls').style.display = 'flex';
             document.querySelector('.todo-stats').style.display = 'block';
             authButton.classList.add('hidden');
-            initializeData(); // Инициализируем данные после успешной авторизации
+            await initializeData(); // Инициализируем данные после успешной авторизации
             
         }
     }

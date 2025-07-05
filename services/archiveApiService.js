@@ -25,7 +25,7 @@ export async function updateToArchiveTodo(todo) {
     const res = await fetch(`${BASE_URL}/${todo.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(todo),
     });
     if (!res.ok) {
         throw new Error('Ошибка при обновлении архивной задачи');

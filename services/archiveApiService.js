@@ -19,3 +19,16 @@ export async function deleteToArchiveTodo(id) {
         method: 'DELETE',
     });
 }
+
+
+export async function updateToArchiveTodo(todo) {
+    const res = await fetch(`${BASE_URL}/${todo.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+    });
+    if (!res.ok) {
+        throw new Error('Ошибка при обновлении архивной задачи');
+    }
+    return await res.json();
+}

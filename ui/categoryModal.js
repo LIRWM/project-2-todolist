@@ -1,6 +1,6 @@
 import { showAlert } from '../ui/alert.js';
 
-export function setupCategoryModal(categories, saveCategories, updateCategorySelect) {
+export function setupCategoryModal(categories, addCategory, updateCategorySelect) {
     const modal = document.getElementById('categoryModal');
     const input = document.getElementById('newCategoryInput');
     const saveBtn = document.getElementById('saveCategoryBtn');
@@ -17,7 +17,7 @@ export function setupCategoryModal(categories, saveCategories, updateCategorySel
         modal.style.display = 'none';
     });
 
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
         const categoryName = input.value.trim();
 
         if (!categoryName) {
@@ -25,31 +25,27 @@ export function setupCategoryModal(categories, saveCategories, updateCategorySel
             return;
         }
 
-        const isDuplicate = categories.some(category => {
-            return typeof category === 'string'
-                ? category === categoryName
-                : category.name === categoryName;
-        });
-
+        const isDuplicate = categories.some(category => category.name === categoryName);
         if (isDuplicate) {
             showAlert('Такая категория уже существует.');
             return;
         }
 
-        const newCategory = {
-            id: Date.now().toString(),
-            name: categoryName
-        };
+        try {
+            const newCategory = await addCategory({ name: categoryName });
+            categories.push(newCategory);
 
-        categories.push(newCategory);
-        
-        categories.sort((a, b) => {
-            const nameA = typeof a === 'string' ? a : a.name;
-            const nameB = typeof b === 'string' ? b : b.name;
-            return nameA.localeCompare(nameB);
-        });
-        saveCategories(categories);
-        updateCategorySelect(categories);
-        modal.style.display = 'none';
+            categories.sort((a, b) => {
+                const nameA = typeof a === 'string' ? a : a.name;
+                const nameB = typeof b === 'string' ? b : b.name;
+                return nameA.localeCompare(nameB);
+            });
+
+            updateCategorySelect(categories);
+            modal.style.display = 'none';
+        } catch (error) {
+            showAlert('Ошибка при добавлении категории.');
+            console.error(error);
+        }
     });
-}
+} 

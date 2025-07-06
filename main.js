@@ -3,16 +3,15 @@ import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
 import { updateStats } from './ui/updateStats.js';
-import { saveTodos } from './services/todoService.js';
-import { saveCategories, loadCategories } from './services/CategoryService.js';
+import { getCategories, addCategory } from './services/categoryApiService.js';
 import { renderTodos } from './ui/renderTodos.js';
 import { updateCategorySelect } from './ui/categoryDropdown.js';
 import { setupCategoryModal } from './ui/categoryModal.js';
 import { showAlert } from './ui/alert.js';
-import { getArchivedTodos, addToArchive, deleteToArchiveTodo } from './services/archiveApiService.js';
+import { getArchivedTodos, addToArchive, } from './services/archiveApiService.js';
+import { getTodos, addTodo, updateTodo } from './services/todoApiService.js';
 
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const showRegisterLink = document.getElementById('showRegister');
@@ -127,15 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (authService.currentUser?.email) {
             const userEmail = authService.currentUser.email;
             try {
-                const todosData = localStorage.getItem(`todos_${userEmail}`);
-
-                todos = todosData ? JSON.parse(todosData) : [];
+                const todos = await getTodos();
                 archivedTodos = await getArchivedTodos();
-                categories = loadCategories();
+                categories = await getCategories();
 
-                setupCategoryModal(categories, saveCategories, updateCategorySelect);
+                setupCategoryModal(categories, addCategory, updateCategorySelect);
                 renderTodos(todos, archivedTodos, categories);
-                updateStats(todos, archivedTodos);
+                updateStats({ todos, archivedTodos });
                 updateCategorySelect(categories);
             } catch (error) {
                 console.error('Ошибка при инициализации данных:', error);
@@ -199,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await Promise.all(archivedWithInfo.map(todo => addToArchive(todo)));
             
             todos = todos.filter(todo => !todo.completed);
-            await saveTodos(todos);
+            await Promise.all(todos.map(todo => updateTodo(todo.id, todo)));
 
             archivedTodos = await getArchivedTodos();
 
@@ -224,26 +221,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (todoText && authService.currentUser) {
             const todo = {
-                id: Date.now().toString(),
                 text: todoText,
                 completed: false,
                 dueDate: dueDate || null,
                 priority,
                 categoryId: categoryId || null,
-                userEmail: authService.currentUser?.email
+                userEmail: authService.currentUser.email
             };
 
-            todos.push(todo);
-            await saveTodos(todos, archivedTodos);
-            renderTodos(todos, archivedTodos, categories);
-            todoInput.value = '';
-            dueDateInput.value = '';
-            prioritySelect.value = 'medium';
-            categorySelect.value = '';
-            updateStats(todos, archivedTodos);
-            return false;
+            try {
+                const createdTodo = await addTodo(todo); // только серверный вариант
+                todos.push(createdTodo);
+                renderTodos(todos, archivedTodos, categories);
+                todoInput.value = '';
+                dueDateInput.value = '';
+                prioritySelect.value = 'medium';
+                categorySelect.value = '';
+                updateStats(todos, archivedTodos);
+            } catch (error) {
+                showAlert('Ошибка при создании задачи');
+            }
         }
-    })
+    });
 
     filterPriority.addEventListener('change', () => renderTodos(todos, archivedTodos, categories));
     sortBy.addEventListener('change', () => renderTodos(todos, archivedTodos, categories));

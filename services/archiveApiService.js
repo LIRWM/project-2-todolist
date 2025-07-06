@@ -16,11 +16,18 @@ export async function addToArchive(todo) {
     return await res.json();
 }
 
-export async function deleteToArchiveTodo(id) {
-    const res = await fetch(`${BASE_URL}/${id}`, {
-        method: 'DELETE',
-    });
-    if (!res.ok) throw new Error('Ошибка при удалении из архива');
+export async function deleteFromArchive(id) {
+    try {
+        const response = await fetch(`${BASE_URL}/archivedTodos/${id}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) {
+            throw new Error('Ошибка при удалении задачи из архива');
+        }
+    } catch (error) {
+        console.error('Ошибка в deleteFromArchive:', error);
+        throw error;
+    }
 }
 
 export async function updateToArchiveTodo(todo) {

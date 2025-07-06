@@ -1,11 +1,11 @@
 const BASE_URL = 'http://localhost:3000/categories';
 
-export  async function getCategories() {
+export async function getCategories() {
     const res = await fetch(BASE_URL);
     return await res.json();
 }
 
-export  async function addCategory(category) {
+export async function addCategory(category) {
     const res = await fetch(BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

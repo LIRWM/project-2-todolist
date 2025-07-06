@@ -1,7 +1,10 @@
-import { updateStats } from '../ui/updateStats.js';
-import { saveTodos, filterAndSortTodos } from '../services/todoService.js';
+
+import { filterAndSortTodos } from '../services/todoService.js';
 import { createTodoElement } from '../ui/todoElement.js';
 import { addToArchive, getArchivedTodos } from '../services/archiveApiService.js';
+import { deleteTodo, updateTodo } from '../services/todoApiService.js';
+import { updateStats } from './updateStats.js';
+import { showAlert } from './alert.js';
 
 export async function renderTodos(todos, archivedTodos, categories) {
     const todoList = document.getElementById('todoList');
@@ -20,43 +23,33 @@ export async function renderTodos(todos, archivedTodos, categories) {
         const span = li.querySelector('span');
 
         if (checkbox) {
-            checkbox.addEventListener('change', async () => {
+            checkbox.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (!todo.completed) {
-                    todo.completed = true;
-                    li.classList.add('completed');
-                    li.classList.add('fade-out');
+                    try {
+                        const archivedTodo = { ...todo, archiveDate: new Date().toISOString() };
+                        await addToArchive(archivedTodo);
+                        await deleteTodo(todo.id);
 
-                    setTimeout(async () => {
-                        try {
-                            const archivedTodo = {
-                                ...todo,
-                                archiveDate: new Date().toISOString()
-                            };
+                        todos = todos.filter(t => t.id !== todo.id);
+                        archivedTodos = await getArchivedTodos();
 
-                            await addToArchive(archivedTodo);
-                            todos = todos.filter(t => t.id !== todo.id);
-
-                            archivedTodos = await getArchivedTodos();
-                            await saveTodos(todos, archivedTodos);
-
-                            const result = await renderTodos(todos, archivedTodos, categories);
-                            todos = result.todos;
-                            archivedTodos = result.archivedTodos;
-                            updateStats(todos, archivedTodos);
-                        } catch (error) {
-                            console.error('Ошибка при архивации задачи:', error);
-                        }
-                    }, 500);
+                        renderTodos(todos, archivedTodos, categories);
+                        updateStats(todos, archivedTodos);
+                    } catch (error) {
+                        console.error('Ошибка при архивации задачи:', error);
+                    }
                 } else {
                     todo.completed = false;
-                    li.classList.remove('completed');
-                    await saveTodos(todos, archivedTodos);
+                    await updateTodo(todo.id, { completed: false });
+                    renderTodos(todos, archivedTodos, categories);
                 }
             });
         }
 
         if (editBtn) {
-            editBtn.addEventListener('click', () => {
+            editBtn.addEventListener('click', async () => {
                 const isEditing = li.classList.contains('editing');
                 if (isEditing) {
                     const input = li.querySelector('.edit-input');
@@ -66,7 +59,7 @@ export async function renderTodos(todos, archivedTodos, categories) {
                         input.replaceWith(span);
                         editBtn.innerHTML = '<i class="fas fa-pen"></i>';
                         li.classList.remove('editing');
-                        saveTodos(todos, archivedTodos);
+                        await updateTodo(todo.id, { text: todo.text });
                     }
                 } else {
                     const input = document.createElement('input');
@@ -82,12 +75,17 @@ export async function renderTodos(todos, archivedTodos, categories) {
         }
 
         if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => {
+            deleteBtn.addEventListener('click', async () => {
                 li.classList.add('deleting');
-                setTimeout(() => {
-                    todos = todos.filter(t => t.id !== todo.id);
-                    renderTodos(todos, archivedTodos, categories);
-                    saveTodos(todos, archivedTodos);
+                setTimeout(async () => {
+                    try {
+                        await deleteTodo(todo.id);
+                        todos = todos.filter(t => t.id !== todo.id);
+                        renderTodos(todos, archivedTodos, categories);
+                        updateStats(todos, archivedTodos);
+                    } catch (error) {
+                        showAlert('Ошибка при удалении задачи');
+                    }
                 }, 300);
             });
         }

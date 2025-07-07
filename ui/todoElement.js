@@ -25,12 +25,10 @@ export function createTodoElement(todo, categories) {
     }
 
     const editBtn = document.createElement('button');
-    editBtn.type = 'button';
     editBtn.className = 'edit-btn';
     editBtn.innerHTML = '<i class="fas fa-pen"></i>';
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.type = 'button';
     deleteBtn.className = 'delete-btn';
     deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
 

@@ -1,3 +1,20 @@
+import { authService } from '../services/auth.js';
+import { updateStats } from '../ui/updateStats.js';
+
+export async function saveTodos(todos, archivedTodos) {
+    const userEmail = authService.currentUser?.email;
+    if (!userEmail) return false;
+
+    try {
+        localStorage.setItem(`todos_${userEmail}`, JSON.stringify(todos));
+        updateStats(todos, archivedTodos);
+        return true;
+    } catch (error) {
+        console.error('Ошибка при сохранении задач:', error);
+        return false;
+    }
+}
+
 export function filterAndSortTodos(todos, filterPriorityValue, sortByValue, categories) {
     let filteredTodos = [...todos];
 
@@ -20,7 +37,7 @@ export function filterAndSortTodos(todos, filterPriorityValue, sortByValue, cate
                 if (!b.dueDate) return -1;
                 return new Date(a.dueDate) - new Date(b.dueDate);
             });
-            break;
+        break;
         case 'category':
             filteredTodos.sort((a, b) => {
                 const aCategory = categories.find(cat => cat.id === a.categoryId)?.name || '';
@@ -28,6 +45,6 @@ export function filterAndSortTodos(todos, filterPriorityValue, sortByValue, cate
                 return aCategory.localeCompare(bCategory);
             });
             break;
-    }
+        }
     return filteredTodos;
 }

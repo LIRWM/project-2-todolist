@@ -1,10 +1,9 @@
-
+import { updateStats } from '../ui/updateStats.js';
 import { filterAndSortTodos } from '../services/todoService.js';
 import { createTodoElement } from '../ui/todoElement.js';
 import { addToArchive, getArchivedTodos } from '../services/archiveApiService.js';
 import { deleteTodo, updateTodo } from '../services/todoApiService.js';
-import { updateStats } from './updateStats.js';
-import { showAlert } from './alert.js';
+import { showAlert } from '../ui/alert.js';
 
 export async function renderTodos(todos, archivedTodos, categories) {
     const todoList = document.getElementById('todoList');
@@ -23,45 +22,71 @@ export async function renderTodos(todos, archivedTodos, categories) {
         const span = li.querySelector('span');
 
         if (checkbox) {
-            checkbox.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+            checkbox.addEventListener('change', async (e) => {
+                e.preventDefault(); 
+                e.stopPropagation(); 
                 if (!todo.completed) {
-                    try {
-                        const archivedTodo = { ...todo, archiveDate: new Date().toISOString() };
-                        await addToArchive(archivedTodo);
-                        await deleteTodo(todo.id);
+                    // Mark as completed and archive after a short delay
+                    todo.completed = true;
+                    li.classList.add('completed');
+                    li.classList.add('fade-out');
 
-                        todos = todos.filter(t => t.id !== todo.id);
-                        archivedTodos = await getArchivedTodos();
-
-                        renderTodos(todos, archivedTodos, categories);
-                        updateStats(todos, archivedTodos);
-                    } catch (error) {
-                        console.error('Ошибка при архивации задачи:', error);
-                    }
+                    setTimeout(async () => {
+                        try {
+                            const archivedTodo = {
+                                ...todo,
+                                archiveDate: new Date().toISOString()
+                            };
+                            // Add to archive on server and remove from active todos
+                            await addToArchive(archivedTodo);
+                            await deleteTodo(todo.id);
+                            todos = todos.filter(t => t.id !== todo.id);
+                            // Refresh archived list from server
+                            archivedTodos = await getArchivedTodos();
+                            // Re-render list and update stats
+                            renderTodos(todos, archivedTodos, categories);
+                            updateStats(todos, archivedTodos);
+                        } catch (error) {
+                            console.error('Ошибка при архивации задачи:', error);
+                        }
+                    }, 500);
                 } else {
+                    // Un-mark as completed (restore to active)
                     todo.completed = false;
-                    await updateTodo(todo.id, { completed: false });
-                    renderTodos(todos, archivedTodos, categories);
+                    li.classList.remove('completed');
+                    try {
+                        await updateTodo(todo.id, { completed: false });
+                    } catch (error) {
+                        console.error('Ошибка при обновлении задачи:', error);
+                    }
+                    updateStats(todos, archivedTodos);
                 }
+                return false;
             });
         }
 
         if (editBtn) {
-            editBtn.addEventListener('click', async () => {
+            editBtn.addEventListener('click', () => {
                 const isEditing = li.classList.contains('editing');
                 if (isEditing) {
                     const input = li.querySelector('.edit-input');
                     if (input && input.value.trim()) {
+                        // Save edited text
                         todo.text = input.value.trim();
                         span.textContent = todo.text;
                         input.replaceWith(span);
                         editBtn.innerHTML = '<i class="fas fa-pen"></i>';
                         li.classList.remove('editing');
-                        await updateTodo(todo.id, { text: todo.text });
+                        try {
+                            updateTodo(todo.id, { text: todo.text });
+                        } catch (error) {
+                            console.error('Ошибка при обновлении задачи:', error);
+                            showAlert('Не удалось сохранить изменения задачи на сервере.', 'error');
+                        }
+                        updateStats(todos, archivedTodos);
                     }
                 } else {
+                    // Enter edit mode
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'edit-input';
@@ -75,17 +100,18 @@ export async function renderTodos(todos, archivedTodos, categories) {
         }
 
         if (deleteBtn) {
-            deleteBtn.addEventListener('click', async () => {
+            deleteBtn.addEventListener('click', () => {
                 li.classList.add('deleting');
                 setTimeout(async () => {
                     try {
                         await deleteTodo(todo.id);
-                        todos = todos.filter(t => t.id !== todo.id);
-                        renderTodos(todos, archivedTodos, categories);
-                        updateStats(todos, archivedTodos);
                     } catch (error) {
-                        showAlert('Ошибка при удалении задачи');
+                        console.error('Ошибка при удалении задачи:', error);
+                        showAlert('Ошибка при удалении задачи.', 'error');
                     }
+                    todos = todos.filter(t => t.id !== todo.id);
+                    renderTodos(todos, archivedTodos, categories);
+                    updateStats(todos, archivedTodos);
                 }, 300);
             });
         }

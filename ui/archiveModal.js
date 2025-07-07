@@ -1,4 +1,4 @@
-import { getArchivedTodos, deleteFromArchive } from '../services/archiveApiService.js';
+import { getArchivedTodos, deleteToArchiveTodo } from '../services/archiveApiService.js';
 
 export async function showArchiveModal(categories) {
     const modal = document.createElement('div');
@@ -9,6 +9,7 @@ export async function showArchiveModal(categories) {
     archiveContainer.className = 'archive-container';
 
     const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
     closeBtn.textContent = 'x';
     closeBtn.className = 'close-btn';
     closeBtn.onclick = () => document.body.removeChild(modal);
@@ -46,7 +47,7 @@ export async function showArchiveModal(categories) {
             deleteBtn.className = 'delete-btn';
             deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
             deleteBtn.onclick = async () => {
-                await deleteFromArchive(todo.id);
+                await deleteToArchiveTodo(todo.id);
                 document.body.removeChild(modal);
                 showArchiveModal(categories); // повторная отрисовка
             };

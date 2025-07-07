@@ -1,96 +1,95 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Todo List</title>
-        <link rel="stylesheet" href="style.css">   
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    </head>
-    <body>
-        <div class="blurred-bg hidden" id="blurredBg"></div>
-        <div class="auth-container hidden" id="authContainer">
-            <form id="loginForm" class="auth-form">
-                <h2>Вход</h2>
-                <input type="email" id="loginEmail" placeholder="Email" required>
-                <input type="password" id="loginPassword" placeholder="Пароль" required>
-                <button type="submit">Войти</button>
-                <p>Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a></p>
-            </form>
-            <form class="auth-form" id="registerForm">
-                <h2>Регистрация</h2>
-                <input type="email" id="registerEmail" placeholder="Email" required>
-                <input type="password" id="registerPassword" placeholder="Пароль" required>
-                <input type="password" id="confirmPassword" placeholder="Подтвердите пароль" required>
-                <button type="submit">Зарегистрироваться</button>
-                <p>Уже есть аккаунт? <a href="#" id="showLogin">Войти</a></p>
-            </form>
-        </div>
-        <div class="container" id="mainContainer">
-            <div class="header">
-                <h1>Todo List</h1>
-                <div class="header-controls">
-                    <div class="user-info hidden">
-                        <img src="./assets/default-avatar.svg" alt="Avatar" class="user-avatar" id="userAvatar">
-                        <span id="userEmail"></span>
-                        <button id="logoutButton" class="logout-button" aria-label="Выйти">🚪</button>
-                    </div>
-                    <button id="authButton" class="auth-button">Войти</button>
-                    <button id="themeToggle" class="theme-toggle" aria-label="Переключить тему">🌙</button>
-                </div>
-            </div>
-            <form id="todoForm">
-                <input type="text" id="todoInput" placeholder="Что нужно сделать?" required>
-                <input type="date" id="dueDateInput" min="" aria-label="Дата выполнения">
-                <select id="prioritySelect">
-                    <option value="low">Низкий</option>
-                    <option value="medium" selected>Средний</option>
-                    <option value="high">Высокий</option>
-                </select>
-                <select id="categorySelect">
-                    <option value="">Без категории</option>
-                </select>
-                <button type="submit">Добавить</button>
-            </form>
-            <div class="controls">
-                <select id="filterPriority"> 
-                    <option value="all">Все задачи</option>
-                    <option value="high">Высокий приоритет</option>
-                    <option value="medium">Средний приоритет</option>
-                    <option value="low">Низкий приоритет</option>
-                </select>
-                <select id="sortBy">
-                    <option value="default">По умолчанию</option>
-                    <option value="category">По категории</option>
-                    <option value="priority">По приоритету</option>
-                    <option value="name">По названию</option>
-                    <option value="dueDate">По сроку</option>
-                </select>
-                <button id="addCategoryButton">Добавить категорию</button>
-                <button id="archiveButton">Архив</button>
-            </div>
-            <div class="todo-stats">
-                <div class="stats-numbers">
-                    <span>Всего задач: <span id="totalTasks">0</span></span>
-                    <span>Выполнено: <span id="completedTasks">0</span></span>
-                </div>
-                <div class="progress-bar">
-                    <div id="progressFill" class="progress-fill"></div>
-                </div>
-            </div>
-            <ul id="todoList"></ul>
-        </div>
-        <div id="categoryModal" class="modal" style="display: none;">
-  <div class="modal-content">
-    <h2>Новая категория</h2>
-    <input type="text" id="newCategoryInput" placeholder="Введите категорию" />
-    <div class="modal-buttons">
-      <button id="saveCategoryBtn">Сохранить</button>
-      <button id="cancelCategoryBtn">Отмена</button>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo List</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <div class="blurred-bg hidden" id="blurredBg"></div>
+    <div class="auth-container hidden" id="authContainer">
+        <form class="auth-form" id="loginForm">
+            <h2>Вход</h2>
+            <input type="email" id="loginEmail" placeholder="Email" required />
+            <input type="password" id="loginPassword" placeholder="Пароль" required />
+            <button type="submit">Войти</button>
+            <p>Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a></p>
+        </form>
+        <form class="auth-form" id="registerForm">
+            <h2>Регистрация</h2>
+            <input type="email" id="registerEmail" placeholder="Email" required />
+            <input type="password" id="registerPassword" placeholder="Пароль" required />
+            <input type="password" id="confirmPassword" placeholder="Подтвердите пароль" required />
+            <button type="submit">Зарегистрироваться</button>
+            <p>Уже есть аккаунт? <a href="#" id="showLogin">Войти</a></p>
+        </form>
     </div>
-  </div>
-</div>
-        <script src="services/index.js" type="module"></script>
-        <script src="main.js" type="module"></script>
-    </body>
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <h1>Todo List</h1>
+            <div class="header-controls">
+                <div class="user-info hidden">
+                    <img id="userAvatar" class="user-avatar" src="./assets/default-avatar.svg" alt="Avatar" />
+                    <span id="userEmail"></span>
+                    <button id="logoutButton" class="logout-button" aria-label="Выйти" type="button">🚪</button>
+                </div>
+                <button id="authButton" class="auth-button" type="button">Войти</button>
+                <button id="themeToggle" class="theme-toggle" aria-label="Переключить тему" type="button">🌙</button>
+            </div>
+        </div>
+        <form id="todoForm">
+            <input type="text" id="todoInput" placeholder="Что нужно сделать?" required />
+            <input type="date" id="dueDateInput" min="" aria-label="Дата выполнения" />
+            <select id="prioritySelect">
+                <option value="low">Низкий</option>
+                <option value="medium" selected>Средний</option>
+                <option value="high">Высокий</option>
+            </select>
+            <select id="categorySelect">
+                <option value="">Без категории</option>
+            </select>
+            <button type="submit">Добавить</button>
+        </form>
+        <div class="controls">
+            <select id="filterPriority">
+                <option value="all">Все задачи</option>
+                <option value="high">Высокий приоритет</option>
+                <option value="medium">Средний приоритет</option>
+                <option value="low">Низкий приоритет</option>
+            </select>
+            <select id="sortBy">
+                <option value="default">По умолчанию</option>
+                <option value="category">По категории</option>
+                <option value="priority">По приоритету</option>
+                <option value="name">По названию</option>
+                <option value="dueDate">По сроку</option>
+            </select>
+            <button id="addCategoryButton" type="button">Добавить категорию</button>
+            <button id="archiveButton" type="button">Архив</button>
+        </div>
+        <div class="todo-stats">
+            <div class="stats-numbers">
+                <span>Всего задач: <span id="totalTasks">0</span></span>
+                <span>Выполнено: <span id="completedTasks">0</span></span>
+            </div>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+        </div>
+        <ul id="todoList"></ul>
+    </div>
+    <div id="categoryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Новая категория</h2>
+            <input id="newCategoryInput" type="text" placeholder="Введите категорию" />
+            <div class="modal-buttons">
+                <button id="saveCategoryBtn" type="button">Сохранить</button>
+                <button id="cancelCategoryBtn" type="button">Отмена</button>
+            </div>
+        </div>
+    </div>
+    <script src="main.js" type="module"></script>
+</body>
 </html>

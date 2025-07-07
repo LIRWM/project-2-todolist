@@ -3,13 +3,39 @@ import { showArchiveModal } from './ui/archiveModal.js';
 import { validatePassword } from './utils/validatePassword.js';
 import { themeToggle } from './ui/themeToggle.js';
 import { updateStats } from './ui/updateStats.js';
-import { getCategories, addCategory } from './services/categoryApiService.js';
 import { renderTodos } from './ui/renderTodos.js';
 import { updateCategorySelect } from './ui/categoryDropdown.js';
 import { setupCategoryModal } from './ui/categoryModal.js';
 import { showAlert } from './ui/alert.js';
-import { getArchivedTodos, addToArchive, } from './services/archiveApiService.js';
-import { getTodos, addTodo, updateTodo } from './services/todoApiService.js';
+import { getTodos, addTodo, deleteTodo } from './services/todoApiService.js';
+import { getArchivedTodos } from './services/archiveApiService.js';
+import { getCategories } from './services/categoryApiService.js';
+
+let todos = [];
+let archivedTodos = [];
+let categories = [];
+
+async function initializeData() {
+    if (authService.currentUser?.email) {
+        const userEmail = authService.currentUser.email;
+        try {
+            todos = await getTodos(userEmail);
+            archivedTodos = await getArchivedTodos();
+            const allCategories = await getCategories();
+            categories = allCategories.filter(cat => !cat.userEmail || cat.userEmail === userEmail);
+
+            setupCategoryModal(categories, null, updateCategorySelect);
+            renderTodos(todos, archivedTodos, categories);
+            updateStats(todos, archivedTodos);
+            updateCategorySelect(categories);
+        } catch (error) {
+            console.error('Ошибка при инициализации данных:', error);
+            todos = [];
+            archivedTodos = [];
+            categories = [];
+        }
+    }
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     const loginForm = document.getElementById('loginForm');
@@ -29,27 +55,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const authContainer = document.getElementById('authContainer');
     const mainContainer = document.getElementById('mainContainer');
 
-    if (!authService.checkAuth()) {
-        mainContainer.classList.add("hidden");
-        document.querySelector('.user-info').classList.add("hidden");
-        authButton.classList.remove("hidden");
-        authContainer.classList.remove("hidden");
-        registerForm.classList.add("hidden")
+    if (authService.checkAuth()) {
+        await showApp();
     } else {
-        authContainer.classList.add("hidden");
-        mainContainer.classList.remove("hidden");
-        document.querySelector('.user-info').classList.remove("hidden");
-        authButton.classList.add("hidden");
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser) {
-            userEmailSpan.textContent = currentUser.email;
-        }
+        mainContainer.classList.add('hidden');
+        document.querySelector('.user-info').classList.add('hidden');
+        authButton.classList.remove('hidden');
+        authContainer.classList.remove('hidden');
+        registerForm.classList.add('hidden');
     }
+
     themeToggle();
 
-    authButton.addEventListener('click', () => {
-        showAuth();
-    });
+    authButton.addEventListener('click', showAuth);
 
     showRegisterLink.addEventListener('click', (e) => {
         e.preventDefault();
@@ -74,11 +92,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             showAlert(errors.join('\n'));
             return;
         }
+
         try {
             await authService.register(email, password);
             showApp();
         } catch (error) {
-            showAlert('error', 'Ошибка при авторизации!');
+            showAlert('Ошибка при регистрации!', 'error');
         }
     });
 
@@ -89,14 +108,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             await authService.login(email, password);
-            showApp();
-            mainContainer.classList.remove('hidden');
-        } catch(error) {
+            await showApp();
+        } catch (error) {
             showAlert('Ошибка при авторизации!', 'error');
         }
     });
 
-    logoutButton.addEventListener('click', async () => {
+    logoutButton.addEventListener('click', () => {
         authService.logout();
         mainContainer.classList.add('hidden');
         document.querySelector('.user-info').classList.add('hidden');
@@ -105,6 +123,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         todoForm.style.display = 'none';
         document.querySelector('.controls').style.display = 'none';
         document.querySelector('.todo-stats').style.display = 'none';
+        todos = [];
+        archivedTodos = [];
+        categories = [];
         showAuth();
     });
 
@@ -118,39 +139,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         authButton.classList.add('hidden');
     }
 
-    let todos = [];
-    let archivedTodos = [];
-    let categories = [];
-
-    async function initializeData() {
-        if (authService.currentUser?.email) {
-            const userEmail = authService.currentUser.email;
-            try {
-                const todos = await getTodos();
-                archivedTodos = await getArchivedTodos();
-                categories = await getCategories();
-
-                setupCategoryModal(categories, addCategory, updateCategorySelect);
-                renderTodos(todos, archivedTodos, categories);
-                updateStats({ todos, archivedTodos });
-                updateCategorySelect(categories);
-            } catch (error) {
-                console.error('Ошибка при инициализации данных:', error);
-                todos = [];
-                archivedTodos = [];
-                categories = [];
-            }
-        }
-    }
-
-    // Вызываем initializeData только при входе пользователя
     async function showApp() {
         const blurredBg = document.getElementById('blurredBg');
         authContainer.classList.add('hidden');
         blurredBg.classList.add('hidden');
-        mainContainer.classList.remove('hidden');
-        mainContainer.classList.remove('blur');
-        
+        mainContainer.classList.remove('hidden', 'blur');
+
         if (authService.currentUser) {
             userEmailSpan.textContent = authService.currentUser.email;
             document.querySelector('.user-info').classList.remove('hidden');
@@ -158,62 +152,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelector('.controls').style.display = 'flex';
             document.querySelector('.todo-stats').style.display = 'block';
             authButton.classList.add('hidden');
-            await initializeData(); // Инициализируем данные после успешной авторизации
-            
+            await initializeData();
         }
     }
-    
 
-    if (authService.checkAuth()) {
-        showApp();
-    } else {
-        // Скрываем элементы управления
-        todoForm.style.display = 'none';
-        document.querySelector('.controls').style.display = 'none';
-        document.querySelector('.todo-stats').style.display = 'none';
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    dueDateInput.min = today;
-
-    
-
-    authButton.addEventListener('click', showAuth);
-
-    async function archiveCompletedTodos() {
+    archiveButton.addEventListener('click', async () => {
         const completedTodos = todos.filter(todo => todo.completed);
         if (archivedTodos.length === 0) {
             showAlert('Нет выполненных задач для архивации', 'error');
             return;
         }
-        
         try {
-            const archivedWithInfo = completedTodos.map(todo => ({
-            ...todo,
-            archiveDate: new Date().toISOString()
-        }));
-
-        await Promise.all(archivedWithInfo.map(todo => addToArchive(todo)));
-            
+            await Promise.all(completedTodos.map(todo => deleteTodo(todo.id)));
             todos = todos.filter(todo => !todo.completed);
-            await Promise.all(todos.map(todo => updateTodo(todo.id, todo)));
-
             archivedTodos = await getArchivedTodos();
 
             renderTodos(todos, archivedTodos, categories);
             updateStats(todos, archivedTodos);
-            showArchiveModal(archivedTodos, categories);
+            showArchiveModal(categories);
         } catch (error) {
             console.error('Ошибка при архивации:', error);
             showAlert('Произошла ошибка при архивации задач', 'error');
         }
-    }
-
-    archiveButton.addEventListener('click', archiveCompletedTodos);
+    });
 
     todoForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
+    e.preventDefault();
         const todoText = todoInput.value.trim();
         const dueDate = dueDateInput.value;
         const priority = prioritySelect.value;
@@ -221,6 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (todoText && authService.currentUser) {
             const todo = {
+                id: Date.now().toString(),
                 text: todoText,
                 completed: false,
                 dueDate: dueDate || null,
@@ -228,25 +193,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 categoryId: categoryId || null,
                 userEmail: authService.currentUser.email
             };
-
             try {
-                const createdTodo = await addTodo(todo); // только серверный вариант
+                const createdTodo = await addTodo(todo);
                 todos.push(createdTodo);
-                renderTodos(todos, archivedTodos, categories);
-                todoInput.value = '';
-                dueDateInput.value = '';
-                prioritySelect.value = 'medium';
-                categorySelect.value = '';
-                updateStats(todos, archivedTodos);
             } catch (error) {
-                showAlert('Ошибка при создании задачи');
+                console.error('Ошибка при добавлении задачи:', error);
+                showAlert('Не удалось сохранить задачу на сервере.', 'error');
+                todos.push(todo);
             }
+            renderTodos(todos, archivedTodos, categories);
+            todoInput.value = '';
+            dueDateInput.value = '';
+            prioritySelect.value = 'medium';
+            categorySelect.value = '';
+            updateStats(todos, archivedTodos);
         }
     });
 
-    filterPriority.addEventListener('change', () => renderTodos(todos, archivedTodos, categories));
-    sortBy.addEventListener('change', () => renderTodos(todos, archivedTodos, categories));
-    updateCategorySelect(categories);
-    renderTodos(todos, archivedTodos, categories);
-    updateStats(todos, archivedTodos); 
+    filterPriority.addEventListener('change', () => {
+        renderTodos(todos, archivedTodos, categories);
+    });
+
+    sortBy.addEventListener('change', () => {
+        renderTodos(todos, archivedTodos, categories);
+    });
 });

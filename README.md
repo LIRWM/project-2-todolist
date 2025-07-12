@@ -9,8 +9,8 @@ A modern task management web application with user authentication, categories, a
 ## Key Features
 
 ### Authentication and Profile
-- User registration and login
-- User profile with avatar
+- User registration and login with password validation
+- User profile with customizable avatar
 - Isolated user data
 - Session persistence
 
@@ -22,7 +22,7 @@ A modern task management web application with user authentication, categories, a
 - Delete and save animations
 
 ### Organization and Categories
-- Custom task categories
+- Custom task categories with dropdown selection
 - Task priorities (High, Medium, Low)
 - Priority filtering
 - Sort by priority, name, category, and due date
@@ -30,21 +30,37 @@ A modern task management web application with user authentication, categories, a
 ### Archive and Statistics
 - Archive completed tasks
 - View archive with preserved categories
+- Real-time statistics tracking
 - Active and completed task counter
 - Completion progress bar
 
 ### Interface
-- Dark and light themes
+- Dark and light theme toggle
 - Responsive design
 - Visual priority indicators
 - Intuitive user interface
+- Alert system for user notifications
 
 ## Technologies
 - HTML5 and CSS3
 - JavaScript (ES6+)
 - Local Storage for data persistence
 - Font Awesome for icons
-- Modular architecture (authentication and task services)
+- Modular architecture:
+  - Authentication service
+  - Task management service
+  - Category service
+  - Archive service
+  - Statistics service
+  - UI components
+
+## Project Structure
+```
+├── assets/           # Static assets
+├── services/         # Core business logic
+├── ui/              # UI components
+└── utils/           # Utility functions
+```
 
 ## Installation and Setup
 1. Clone the repository:
@@ -58,7 +74,7 @@ git clone [repository-url]
 
 ## Security
 - User data isolation
-- Secure password storage
+- Secure password validation
 - Session management
 - Input validation
 
@@ -76,8 +92,8 @@ git clone [repository-url]
 ## Основные возможности
 
 ### Аутентификация и профиль
-- Регистрация и вход в систему
-- Профиль пользователя с аватаром
+- Регистрация и вход в систему с валидацией паролей
+- Профиль пользователя с настраиваемым аватаром
 - Изолированные данные для каждого пользователя
 - Сохранение сессии пользователя
 
@@ -89,7 +105,7 @@ git clone [repository-url]
 - Анимации при удалении и сохранении
 
 ### Организация и категории
-- Пользовательские категории задач
+- Пользовательские категории задач с выпадающим списком
 - Приоритеты задач (Высокий, Средний, Низкий)
 - Фильтрация по приоритетам
 - Сортировка по приоритету, названию, категории и сроку
@@ -97,21 +113,37 @@ git clone [repository-url]
 ### Архив и статистика
 - Архивация выполненных задач
 - Просмотр архива с сохранением категорий
+- Отслеживание статистики в реальном времени
 - Счетчик активных и выполненных задач
 - Прогресс-бар выполнения
 
 ### Интерфейс
-- Темная и светлая темы
+- Переключение между темной и светлой темами
 - Адаптивный дизайн
 - Визуальные индикаторы приоритетов
 - Интуитивно понятный интерфейс
+- Система оповещений для пользователя
 
 ## Технологии
 - HTML5 и CSS3
 - JavaScript (ES6+)
 - Local Storage для хранения данных
 - Font Awesome для иконок
-- Модульная архитектура (сервисы аутентификации и задач)
+- Модульная архитектура:
+  - Сервис аутентификации
+  - Сервис управления задачами
+  - Сервис категорий
+  - Сервис архивации
+  - Сервис статистики
+  - UI компоненты
+
+## Структура проекта
+```
+├── assets/           # Статические ресурсы
+├── services/         # Основная бизнес-логика
+├── ui/              # UI компоненты
+└── utils/           # Вспомогательные функции
+```
 
 ## Установка и запуск
 1. Клонируйте репозиторий:
@@ -125,7 +157,7 @@ git clone [url-репозитория]
 
 ## Безопасность
 - Изоляция данных пользователей
-- Безопасное хранение паролей
+- Безопасная валидация паролей
 - Управление сессиями
 - Проверка входных данных
 

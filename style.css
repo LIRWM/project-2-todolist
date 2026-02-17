@@ -607,6 +607,9 @@ button:hover {
     color: var(--category-text);
     border-radius: 12px;
     margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .hidden {
@@ -804,7 +807,7 @@ button:hover {
     transform: translateX(-50%);
     padding: 10px 20px;
     font-size: 14px;
-    background-color: #B93335;
+    background-color: #16b3e9;
     color: white;
     border-radius: 6px;
     z-index: 1000;

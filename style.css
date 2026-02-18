@@ -206,10 +206,6 @@ button:hover {
     border-left: 4px solid #e63946;
 }
 
-.todo-item.overdue .due-date {
-    font-weight: bold;
-    color: #ffbaba;
-}
 
 .todo-item.priority-low {
     border-left: 4px solid var(--priority-low);

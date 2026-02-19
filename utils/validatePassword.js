@@ -13,9 +13,5 @@ export function validatePassword(password, confirmPassword) {
     if (!/\d/.test(password)) {
         errors.push('Нужна хотя бы одна цифра');
     }
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-        errors.push('Нужен спецсимвол');
-    }
-
         return errors;
 }
